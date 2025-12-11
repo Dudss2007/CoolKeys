@@ -5,4 +5,8 @@ def home_view(request):
         request,
         'home.html'
     )
-
+def carrinho_view(request):
+    return render(
+        request,
+        'carrinho.html'
+    )
