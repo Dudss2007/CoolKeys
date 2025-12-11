@@ -126,9 +126,6 @@ LOGIN_URL = 'accounts/login/' #preencher essa chave quando o html estiver pronto
 
 #imagens
 
-# Diretório base do projeto
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 # Onde os arquivos de upload serão salvos
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
