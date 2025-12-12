@@ -41,7 +41,7 @@ def adicionar_carrinho(request, jogo_id):
         jogo = Jogo.objects.get(id=jogo_id)
         
         # 2. Pega ou cria carrinho (simplificado)
-        carrinho, created = Compra.objects.get_or_create(
+        carrinho, created = Compra.objects.get_or_create( #created verifica se já existe um carrinho
             usuario=request.user,
             status='carrinho',
             defaults={'valor_total': 0}
@@ -63,10 +63,10 @@ def adicionar_carrinho(request, jogo_id):
         carrinho.valor_total = total
         carrinho.save()
         
-        print(f"✅ Item adicionado! Carrinho ID: {carrinho.id}, Itens: {carrinho.itens.count()}")
+        print(f"Item adicionado! Carrinho ID: {carrinho.id}, Itens: {carrinho.itens.count()}")
         
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f"Erro: {e}")
     
     # 5. REDIRECIONA CORRETAMENTE
     return redirect('/')
