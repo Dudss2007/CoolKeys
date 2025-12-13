@@ -35,12 +35,6 @@ def cadastro_view(request):
     
     return render(request,'registration/cadastro.html',{'form': form})
 
-def jogo_detalhe_view(request):
-    return render(
-        request,
-        jogo_detalhe.html
-    )
-
 
 @login_required
 def adicionar_carrinho(request, jogo_id):
