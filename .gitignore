@@ -1,7 +1,8 @@
 # Media
 media/icones/*
+!media/icones/birdgame.webp
 media/fotos-usuario/*
-!media/icones/bobas.webp
+!media/fotos-usuario/bobas.webp
 
 
 # Byte-compiled / optimized / DLL files

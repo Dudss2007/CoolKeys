@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Perfil - CoolKeys{% endblock %}
+
+{% block conteudo %}
+
+<div class="container py-5">
+
+    <div class="profile-header-card">
+        <div class="profile-bg-glow"></div>
+        
+        <div class="row align-items-center">
+            
+            <div class="profile-avatar-container">
+                    {% if user.minha_foto.last and user.minha_foto.last.foto_perfil %}
+                        <img src="{{ user.minha_foto.last.foto_perfil.url }}" alt="Avatar" class="profile-avatar">
+                    {% endif %}
+
+                    <form method="POST" enctype="multipart/form-data" id="form-foto">
+                        {% csrf_token %}
+                        <input type="file" name="foto_perfil" id="input-foto" style="display: none;" onchange="document.getElementById('form-foto').submit();">
+                        
+                        <label for="input-foto" class="btn-edit-photo" title="Alterar Foto" style="cursor: pointer; margin: 0;">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                    </form>
+                </div>
+
+            <div class="col-md">
+                <div class="profile-info text-center text-md-left mt-4 mt-md-0">
+                    <h1 class="user-name">{{ user.username }}</h1>
+                    
+                    <div class="user-email justify-content-center justify-content-md-start">
+                        <i class="fas fa-envelope text-info"></i>
+                        <span>{{ user.email }}</span>
+                    </div>
+
+                    <div class="user-badges">
+                        <span class="badge badge-primary px-3 py-2">Membro CoolKeys</span>
+                        {% if user.is_staff %}
+                            <span class="badge badge-warning px-3 py-2">Admin</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <h2 class="library-title">Meus Jogos</h2>
+
+    {% if compras_finalizadas %}
+<div class="row g-4">
+    {% for compra in compras_finalizadas %}
+        {% for item in compra.itens.all %}
+            
+            {% with jogo_existe=item.jogo %}
+                {% with nome_exibicao=item.nome_para_exibicao %}
+                    
+                    <div class="col-6 col-md-4 col-lg-3 mb-4">
+                        <div class="game-library-card h-100 {% if not jogo_existe %}card-deleted{% endif %}">
+                            
+                            <a href="{% if jogo_existe %}{% url 'jogo_detalhe' item.jogo.id %}{% else %}#{% endif %}" 
+                               class="text-decoration-none {% if not jogo_existe %}disabled-link{% endif %}">
+                                
+                                {% if jogo_existe and item.jogo.icone %}
+                                    <img src="{{ item.jogo.icone.url }}" class="library-img">
+                                {% else %}
+                                    <img src="{{ jogo.icone.default }}" class="library-img deleted-icon">
+                                {% endif %}
+                                
+                                <div class="library-body">
+                                    <h5 class="library-game-title">
+                                        {{ nome_exibicao }}
+                                    </h5>
+                                    
+                                    <small class="text-success"><i class="fas fa-check-circle me-1"></i>Adquirido em {{ compra.data_compra|date:"d/m/Y" }}</small>
+                                    
+                                    {% if not jogo_existe %}
+                                        <small class="text-danger d-block">Jogo Removido Permanentemente</small>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                
+                {% endwith %}
+            {% endwith %}
+            
+        {% endfor %}
+    {% endfor %}
+</div>
+    {% else %}
+        <div class="text-center py-5 text-muted opacity-50">
+            <i class="fas fa-gamepad fa-3x mb-3"></i>
+            <h4>Você ainda não possui jogos na sua biblioteca.</h4>
+            <a href="{% url 'home' %}" class="btn btn-outline-info mt-3">Ir para a Loja</a>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

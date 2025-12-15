@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load static %}
 
 {% block title %}Meu Carrinho - CoolKeys{% endblock %}
 
@@ -97,25 +96,36 @@
 
                     <div class="d-flex justify-content-between text-success mb-2">
                         <span>Descontos Aplicados</span>
-
+                        {% if total_economizado > 0 %}
+                            <span class="fw-bold">- R$ {{ total_economizado|floatformat:2 }}</span>
+                        {% else %}
+                            <span>- R$ 0,00</span>
+                        {% endif %}
                     </div>
    
 
                 <div class="divider"></div>
-
                 <div class="d-flex justify-content-between align-items-end mb-4">
-                    <span class="text-white h5 mb-0 fw-bold">TOTAL A PAGAR:</span>
+                    <span class="text-white h5 mb-0 fw-bold">TOTAL:</span>
                     <div class="text-end">
                         <span class="cart-price d-block" style="font-size: 1.8rem;">R$ {{ total|floatformat:2 }}</span>
                     </div>
                 </div>
 
-                <button class="btn-checkout-neon">
-                    Finalizar Compra <i class="bi bi-credit-card-2-front-fill"></i>
-                </button>
+                <div class="total-final">
+                        </div>
+
+                    <form method="POST" action="{% url 'finalizar_compra' %}">
+                        {% csrf_token %}
+                        
+                        <button type="submit" class="btn-checkout-neon" style="width: 100%;">
+                            FINALIZAR COMPRA <i class="bi bi-credit-card-2-front-fill"></i> 
+                            </button>
+                    </form>
 
                 <div class="mt-4 text-center">
                 </div>
+
             </div>
         </div>
 
@@ -123,7 +133,7 @@
 
     {% else %}
     <div class="d-flex flex-column align-items-center justify-content-center py-5" style="min-height: 50vh;">
-        <div class="mb-4 p-4 rounded-circle" style="background: rgba(255,255,255,0.05);">
+        <div class="mb-4 p-4 rounded-circle">
             <i class="bi bi-cart-x text-muted" style="font-size: 4rem;"></i>
         </div>
         <h2 class="text-white fw-bold mb-2">Seu carrinho está vazio</h2>
@@ -135,6 +145,6 @@
         </a>
     </div>
     {% endif %}
-
+    
 </div>
 {% endblock %}

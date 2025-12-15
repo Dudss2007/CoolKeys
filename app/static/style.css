@@ -58,7 +58,7 @@ h1, h2, h3, h4, h5, h6 {
 .form-control {
     background-color: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white !important;
+    color: rgb(0, 0, 0) !important;
 }
 
 /* =========================================
@@ -637,9 +637,7 @@ footer i:hover {
     /* Preço do Item */
     .cart-price {
         font-size: 1.4rem;
-        font-weight: 800;
-        color: #00ff88; /* Verde Neon */
-        text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        font-weight: 800; 
     }
 
     /* Botão Remover (Lixeira) */
@@ -652,16 +650,16 @@ footer i:hover {
         border-radius: 50%;
         background: rgba(255,255,255,0.05);
         color: #dc3545; /* Vermelho */
-        border: 1px solid transparent;
+        border: 2px solid transparent;
         transition: all 0.3s;
         text-decoration: none;
+        margin-left: 35px;
     }
     .btn-trash:hover {
         background: rgba(220, 53, 69, 0.2);
         border-color: #dc3545;
         color: #fff;
-        transform: scale(1.1) rotate(10deg);
-        box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);
+        transform: scale(1.1) 
     }
 
     /* Painel de Resumo (Direita) */
@@ -703,3 +701,329 @@ footer i:hover {
 
     /* Linhas de separação */
     .divider { border-bottom: 1px solid rgba(255,255,255,0.1); margin: 20px 0; }
+.cart-badge-neon {
+    /* Força o posicionamento absoluto */
+    position: absolute !important;
+    
+    /* Zera as posições automáticas do Bootstrap */
+    top: 2px !important;      /* Ajuste vertical: Desce um pouquinho do topo */
+    right: 0px !important;    /* Ajuste horizontal: Cola na direita do container */
+    left: auto !important;    /* Remove qualquer alinhamento à esquerda */
+    transform: none !important; /* Remove o translate-middle do bootstrap que estava descentralizando */
+    
+    /* Visual da Bolinha (Mantém o estilo bonito) */
+    background: linear-gradient(135deg, #128cff 0%, #1100ff 100%) !important;
+    color: white !important;
+    font-size: 0.65rem !important;
+    font-weight: 800;
+    
+    /* Tamanho e forma */
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px !important;
+    border-radius: 50px !important;
+    
+    /* Centraliza o texto dentro da bolinha */
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    
+    /* Borda e Sombra */
+    border: 1px solid #0180f0 !important;
+    box-shadow: 0 0 8px rgba(0, 217, 255, 0.8);
+    z-index: 10;
+}
+.navbar-nav .nav-item .nav-link {
+    position: relative !important; /* O Pai tem que ser relativo */
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+.badge-posicao-fixa {
+    position: absolute;
+    /* AJUSTE AQUI: Valores menores trazem a bolinha para mais perto */
+    top: -2px;        /* Subir só um pouquinho */
+    right: -2px;      /* Ir para direita só um pouquinho */
+    
+    /* O resto continua igual para manter o visual neon */
+    background: linear-gradient(135deg, #00a2ff 0%, #0400ff 100%);
+    color: white;
+    font-size: 0.6rem; /* Diminui um pouco a fonte pra caber melhor */
+    font-weight: 800;
+    min-width: 16px;   /* Diminui um pouco o tamanho total */
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #011526; 
+    box-shadow: 0 0 5px rgba(38, 0, 255, 0.8);
+    z-index: 10;
+}
+.old-price {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 0.9rem;
+    margin-right: 8px;
+}
+
+/* Badge de Desconto (-20%) */
+.discount-badge {
+    background-color: #ff0055; /* Rosa Neon */
+    color: white;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 5px;
+    vertical-align: middle;
+    box-shadow: 0 0 8px rgba(255, 0, 85, 0.6);
+}
+/* --- ESTILOS DE DESCONTO --- */
+
+/* 1. Preço original riscado (cor cinza) */
+.price-old-strikethrough {
+    text-decoration: line-through;
+    color: #adb5bd; /* Cinza claro */
+    font-size: 0.9rem;
+    margin-right: 5px;
+}
+
+/* 2. A Tag Vermelha de Porcentagem */
+.discount-tag-red {
+    background-color: #dc3545; /* Vermelho Bootstrap */
+    color: white;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    vertical-align: middle;
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5); /* Brilho vermelho sutil */
+}
+
+/* 3. O Novo Preço (Estilo padrão verde neon que já usamos) */
+.price-new-neon {
+    color: #00ff88;
+    font-weight: 800;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    display: block; /* Garante que fique na linha de baixo */
+    margin-top: -2px; /* Aproxima um pouco da linha de cima */
+}
+.cart-old-price {
+        text-decoration: line-through;
+        color: #888;
+        font-size: 0.8rem;
+        margin-right: 5px;
+    }
+    .cart-discount-badge {
+        background-color: #dc3545;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+.cart-link-container {
+        position: relative !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        overflow: visible !important; /* Importante para a bolinha não ser cortada */
+    }
+
+    /* 2. A BOLINHA (Maior e Mais Visível) */
+    .badge-posicao-fixa {
+        position: absolute !important;
+        
+        /* Ajuste de Posição (Joguei um pouco mais pra fora pra não tampar o carrinho) */
+        top: -8px !important;      
+        right: -8px !important;    
+        
+        /* Tamanho MAIOR */
+        min-width: 24px;  /* Antes era 18px */
+        height: 24px;     /* Antes era 18px */
+        font-size: 0.85rem; /* Aumentei a fonte do número */
+        
+        /* Visual Neon */
+        background: linear-gradient(135deg, #00b7ff 0%, #0011ff 100%);
+        color: white;
+        font-weight: 800;
+        border-radius: 50%;
+        padding: 0 4px;
+        
+        /* Centralizar Texto */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        /* Borda */
+        border: 2px solid #000000; 
+        box-shadow: 0 0 8px rgba(47, 0, 255, 0.8);
+        z-index: 100;
+    }
+.btn-back-neon {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 35px;
+    
+    /* Visual: Fundo transparente com Borda Neon */
+    background: transparent;
+    border: 2px solid #048ABF; /* Ciano */
+    color: #048ABF;
+    
+    border-radius: 50px;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(4, 138, 191, 0.1);
+}
+
+/* Efeito ao passar o mouse */
+.btn-back-neon:hover {
+    background: #048ABF; /* Preenche de ciano */
+    color: #011526;      /* Texto fica escuro */
+    box-shadow: 0 0 25px rgba(4, 138, 191, 0.6); /* Brilho forte */
+    transform: translateX(-5px); /* Move levemente para a esquerda */
+    text-decoration: none;
+}
+.profile-header-card {
+        background: linear-gradient(135deg, rgba(1, 21, 38, 0.95) 0%, rgba(6, 26, 74, 0.95) 100%);
+        border: 1px solid rgba(4, 138, 191, 0.3);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        margin-bottom: 50px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Fundo decorativo (opcional) */
+    .profile-bg-glow {
+        position: absolute;
+        top: -50%;
+        left: -10%;
+        width: 60%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(4, 138, 191, 0.1) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* FOTO DE PERFIL (BOLA GRANDE) */
+    .profile-avatar-container {
+        width: 180px;
+        height: 180px;
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%; /* Faz ficar redondo */
+        object-fit: cover;
+        border: 4px solid #048ABF; /* Borda Ciano */
+        box-shadow: 0 0 20px rgba(4, 138, 191, 0.5); /* Brilho Neon */
+        transition: transform 0.3s ease;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(4, 138, 191, 0.8);
+    }
+
+    /* Botão de editar foto (pequeno no canto) */
+    .btn-edit-photo {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: #011526;
+        border: 2px solid #048ABF;
+        color: #048ABF;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-edit-photo:hover {
+        background: #048ABF;
+        color: white;
+    }
+
+    /* INFO DO USUÁRIO (DIREITA) */
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+        padding-left: 30px;
+    }
+
+    .user-name {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .user-email {
+        font-size: 1.1rem;
+        color: #8fa3bf;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-badges {
+        margin-top: 20px;
+    }
+
+    /* --- SEÇÃO DE JOGOS (EMBAIXO) --- */
+    .library-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+        border-left: 5px solid #048ABF;
+        padding-left: 15px;
+        margin-bottom: 30px;
+    }
+
+    .game-library-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s;
+        border: 1px solid transparent;
+    }
+    .game-library-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(4, 138, 191, 0.3);
+    }
+
+    .library-img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .library-body {
+        padding: 15px;
+    }
+
+    .library-game-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }

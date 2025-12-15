@@ -44,6 +44,7 @@ def cadastro_view(request):
 
 
 
+# CARRINHO FUNÇÕES
 @login_required
 def adicionar_carrinho(request, jogo_id):
     try:
@@ -100,7 +101,8 @@ def remover_carrinho(request, item_id):
     carrinho.valor_total = sum(i.subtotal() for i in carrinho.itens.all())
     carrinho.save()
     return redirect('carrinho')
-
+# CARRINHO VIEW
+@login_required(login_url='login')
 def carrinho_view(request):
     # Busca o carrinho ativo (status='pendente')
     carrinho = Compra.objects.filter(usuario=request.user, status='pendente').first()
@@ -135,10 +137,42 @@ def carrinho_view(request):
         'subtotal_sem_desconto': subtotal_sem_desconto,
     }
     return render(request, 'carrinho.html', context)
+# Finalizar compra
+def finalizar_compra_view(request): 
+    # Apenas processa a requisição se for um POST (enviado pelo formulário)
+    if request.method == 'POST':
+        try:
+            # 1. Busca a compra mais recente do usuário que ainda não está finalizada.
+            # Assumimos que o status inicial de um carrinho é 'aberta'.
+            carrinho = Compra.objects.filter(
+                usuario=request.user,
+                status='pendente'
+            ).order_by('-data_compra').first()
+            
+            if carrinho:
+                # 2. Atualiza o status para 'finalizada'
+                carrinho.status = 'finalizada'
+                carrinho.save()
+                for item in carrinho.itens.all():
+                    # Garante o snapshot após o salvamento
+                    item.save()
+                
+                # 3. Redireciona o usuário (ex: para a página de perfil ou confirmação)
+                return redirect('perfil') 
+            else:
+                # Se não houver carrinho aberto, apenas redireciona de volta
+                return redirect('carrinho')
+                
+        except Exception as e:
+            # Trata qualquer erro (como se o modelo Compra não existisse)
+            print(f"Erro ao finalizar a compra: {e}")
+            return redirect('carrinho')
+            
+    # Se a função for acessada via GET (diretamente pela URL), redireciona
+    return redirect('carrinho')
 
 
-
-
+# 
 def detalhe_categoria_view(request, id):
     # Pega a categoria atual (ex: RPG)
     categoria = get_object_or_404(Categoria, id=id)
@@ -154,10 +188,6 @@ def detalhe_categoria_view(request, id):
         'jogos': jogos,
         'categorias': todas_categorias  # Enviamos para o HTML aqui com o nome que o base.html espera
     })
-
-def lista_categorias_view(request):
-    # Isso torna a variável 'categorias' disponível em TODO o site
-    return {request, {'categorias': Categoria.objects.all()}}
 
 def jogo_detalhe_view(request, id):
     jogo = get_object_or_404(Jogo, id=id)
@@ -178,3 +208,52 @@ def jogo_detalhe_view(request, id):
         'jogos_relacionados': jogos_relacionados,
         'categorias': todas_categorias
     })
+
+@login_required
+def perfil_view(request): 
+    # --- LÓGICA DE UPLOAD DE FOTO ---
+    if request.method == 'POST' and request.FILES.get('foto_perfil'):
+        foto = request.FILES['foto_perfil']
+        
+        # Pega ou cria o perfil de foto do usuário
+        perfil_foto, created = FotoPerfil.objects.get_or_create(usuario=request.user)
+        
+        # Atualiza a foto
+        perfil_foto.foto_perfil = foto
+        perfil_foto.save()
+        
+        # Recarrega a página para mostrar a foto nova
+        return redirect('perfil')
+
+    # --- LÓGICA NORMAL DE EXIBIÇÃO ---
+    compras_finalizadas = Compra.objects.filter(
+        usuario=request.user,
+        status='finalizada'
+    ).order_by('-data_compra')
+
+
+
+    return render(request, 'perfil.html', {
+        'compras_finalizadas': compras_finalizadas,
+    })
+
+# Pagina de ADM
+@login_required
+def dashboard_admin_view(request):
+    # Verifica se o usuário pertence ao grupo 'adm'
+    if not request.user.groups.filter(name='adm').exists():
+        return redirect('home')  # Redireciona para home se não for admin
+    
+    # Estatísticas básicas
+    total_compras = Compra.objects.filter(status='finalizada').count()
+    total_jogos = Jogo.objects.filter(deletado=False).count()
+    compras_recentes = Compra.objects.all().order_by('-data_compra')[:5]
+    
+    context = {
+        'user': request.user,
+        'total_compras': total_compras,
+        'total_jogos': total_jogos,
+        'compras_recentes': compras_recentes,
+    }
+    
+    return render(request, 'control/painel.html', context)
