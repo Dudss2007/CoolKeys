@@ -1,6 +1,8 @@
 # Media
 media/icones/*
+media/fotos-usuario/*
 !media/icones/bobas.webp
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

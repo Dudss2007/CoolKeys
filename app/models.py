@@ -12,12 +12,15 @@ class Categoria(models.Model):
     
     def __str__(self):
         return self.nome
-
+    
 class Jogo(models.Model):
     nome = models.CharField(max_length=200) 
     preco = models.DecimalField(max_digits=8, decimal_places=2)
     descricao = models.TextField()
+    banner = models.BooleanField(default=False)
     deletado = models.BooleanField(default=False) # Soft delete
+    autoria = models.CharField(max_length=200) # Desenvolvedora
+    lancamento = models.DateField()
     desconto = models.IntegerField(
         default=0,
         validators=[
@@ -27,14 +30,21 @@ class Jogo(models.Model):
         null=True, 
         blank=True,
     )
+    STATUS_CHOICES = [
+        # Adicione as plataformas
+        ('pc', 'PC'),
+    ]
+    plataforma = models.CharField(        #Fazer logica de mais de uma  
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='pc'
+        )
 
     icone = models.ImageField(
         upload_to='icones/',
         default='icones/bobas.webp',
         null=True, 
         blank=True,
-        # Por padrão, null=False e blank=False.
-        # Você pode ser explícito, se preferir:
     )
 
     categoria = models.ForeignKey(
@@ -43,7 +53,7 @@ class Jogo(models.Model):
         null=True, 
         blank=True,
         related_name='jogos'  # opcional: para acessar jogos de uma categoria
-    )
+    ) #Fazer logica de mais de uma
     
     @property  # Função que pode ser acessada como atributo
     def preco_com_desconto(self):
@@ -70,7 +80,7 @@ class Jogo(models.Model):
         return f"{self.nome} - R$ {self.preco}"
 
 
-
+# ------- CARRINHO/COMPRAS ------
 class Compra(models.Model): #representa transações em geral, ativas e inativas
     # Status da compra
     STATUS_CHOICES = [
@@ -131,12 +141,10 @@ class Compra(models.Model): #representa transações em geral, ativas e inativas
     
     def save(self, *args, **kwargs):
         # Limpar itens deletados automaticamente para assim atualizar de fato o carrinho sem usar o views
-        
         # Se for um carrinho (pendente), limpa antes de salvar
         if self.status == 'pendente' and self.pk:  # self.pk significa que já existe no banco
             self.limpar_jogos_deletados()
-        
-        super().save(*args, **kwargs) # Salva a Compra
+        super().save(*args, **kwargs)  # Salva a Compra
     
 class ItemCompra(models.Model): # Intermediário entre Compra e Jogo
     compra = models.ForeignKey(Compra, on_delete=models.CASCADE, related_name='itens') 
@@ -203,3 +211,38 @@ class ItemCompra(models.Model): # Intermediário entre Compra e Jogo
         if self.jogo:
             return f"{self.quantidade}x {self.jogo.nome}"
         return f"{self.quantidade}x Jogo Removido" 
+
+# --------- FOTODEPERFIL --------
+
+class FotoPerfil(models.Model):
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='minha_foto', 
+        verbose_name='Client' 
+    )
+    foto_perfil = models.ImageField(
+        upload_to='fotos-usuarios/',
+        default='icones/bobas.webp',
+        null=True, 
+        blank=True,
+    )
+    # Troca de foto:
+    def save(self, *args, **kwargs):
+        # Se já existe (tem ID)
+        if self.pk:
+            try:
+                # Pega a foto antiga do banco
+                foto_antiga = FotoPerfil.objects.get(pk=self.pk).foto_perfil
+                
+                # Se trocou de foto e não é a default
+                if foto_antiga and foto_antiga != self.foto_perfil and 'bobas.webp' not in foto_antiga.name:
+                    # Apaga o arquivo antigo
+                    import os
+                    if os.path.exists(foto_antiga.path):
+                        os.remove(foto_antiga.path)       
+            except:
+                pass # Nada acontece a foto é default
+        
+        # Salva normalmente
+        super().save(*args, **kwargs)

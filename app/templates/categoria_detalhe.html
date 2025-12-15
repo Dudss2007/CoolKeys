@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CoolKeys - {{ categoria.nome }}{% endblock %}
+
+{% block conteudo %}
+
+<section class="py-5 quebra-layout">
+    <div class="container-fluid">
+        
+    
+
+        <h2 class="section-title mb-5">
+            <i class="bi bi-grid-fill me-2"></i> Todos os jogos de: <span style="color: var(--cor-ciano);">{{ categoria.nome }}</span>
+        </h2>
+        <div class="mb-5">
+            <a href="{% url 'home' %}" class="btn-voltar-neon">
+                <i class="bi bi-arrow-left me-2"></i> Voltar para Início
+            </a>
+        </div>
+
+        
+        <div class="row g-4">
+            {% if jogos %}
+                {% for jogo in jogos %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="game-card">
+                        <a href="/jogo/detalhe/{{ jogo.id }}" style="text-decoration: none; color: inherit; display: contents;">
+                            {% if jogo.icone %}
+                            <img src="{{ jogo.icone.url }}" class="card-img-top" alt="{{ jogo.nome }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/300x200?text=Sem+Imagem" class="card-img-top" alt="{{ jogo.nome }}">
+                            {% endif %}
+                        </a>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ jogo.nome }}</h5>
+                            
+                            <p class="card-text">
+                                {{ jogo.descricao|truncatewords:10 }}
+                            </p>
+                            
+                            <div class="mt-auto">
+                                <div class="mb-3">
+                                    <strong class="game-price">R$ {{ jogo.preco|floatformat:2 }}</strong>
+                                </div>
+                                
+                                {% if user.is_authenticated %}
+                                    <form method="POST" action="{% url 'adicionar_carrinho' jogo.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-game btn-add-cart">
+                                            <i class="bi bi-cart-plus me-1"></i> Adicionar
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <a href="{% url 'login' %}" class="btn-game btn-add-cart text-center" style="text-decoration: none;">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i> Login para comprar
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info bg-dark text-white border-info">
+                        Nenhum jogo encontrado nesta categoria no momento.
+                    </div>
+                </div>
+            {% endif %}
+        </div> 
+
+    </div>
+</section>
+
+{% endblock %}

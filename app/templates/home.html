@@ -1,81 +1,191 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Game Rampads - Sua Loja de Jogos PC{% endblock %}
+{% block title %}CoolKeys - Sua Loja de Jogos PC{% endblock %}
 
 {% block conteudo %}
-    <!-- Hero Section -->
-    <section class="hero-section" id="home">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <h1 class="hero-title">Os melhores descontos você encontra aqui!</h1>
-                    <p class="hero-subtitle">Encontre os melhores jogos com os maiores descontos</p>
+<div class="row justify-content-center mb-5">
+    <div class="col-12">
+        {% if banner_games %}
+        <div id="carouselBanner" class="carousel slide shadow-lg rounded overflow-hidden" data-ride="carousel">
+            
+            <ol class="carousel-indicators">
+                {% for jogo in banner_games %}
+                <li data-target="#carouselBanner" data-slide-to="{{ forloop.counter0 }}" 
+                    class="{% if forloop.first %}active{% endif %}"></li>
+                {% endfor %}
+            </ol>
+
+            <div class="carousel-inner">
+                {% for jogo in banner_games %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <a href="/jogo/detalhe/{{ jogo.id }}" class="text-decoration-none">
+                        
+                        <div style="height: 450px; position: relative; background-color: #000;">
+                            
+                            {% if jogo.icone %}
+                            <img src="{{ jogo.icone.url }}" class="d-block w-100" 
+                                 style="height: 100%; object-fit: cover; opacity: 0.7;">
+                            {% else %}
+                            <img src="https://via.placeholder.com/1200x450?text=GAME" class="d-block w-100" 
+                                 style="height: 100%; object-fit: cover; opacity: 0.5;">
+                            {% endif %}
+
+                            <div class="carousel-caption d-none d-md-block text-left" 
+                                 style="bottom: 50px; left: 80px; text-align: left; max-width: 600px; text-shadow: 2px 2px 10px rgba(0,0,0,0.8);">
+                                
+                                <span class="badge badge-warning text-dark mb-3 px-3 py-2 font-weight-bold">DESTAQUE</span>
+                                <h1 class="display-4 font-weight-bold text-white mb-2">{{ jogo.nome }}</h1>
+                                <p class="lead text-light mb-4">{{ jogo.descricao|truncatewords:20 }}</p>
+                                
+                                <button class="btn-banner-neon">
+                                    VER AGORA
+                                </button>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <a class="carousel-control-prev" href="#carouselBanner" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Anterior</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselBanner" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Próximo</span>
+            </a>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            Marque jogos como <strong>"Banner"</strong> no dashboard de ADM.
+        </div>
+        {% endif %}
+    </div>
+</div>
+<section class="py-5 quebra-layout" id="games">
+    <div class="container-fluid">
+        
+        {% for categoria in categorias %}
+            {% if categoria.destaque %}
+                
+                <div class="d-flex justify-content-between align-items-end mb-4 border-bottom border-secondary pb-2">
+                    <h2 class="section-title mb-0">
+                        <i class="bi bi-stars me-2"></i> {{ categoria.nome }}
+                    </h2>
+                    {% if categoria.jogos.count > 4 %}
+                    <a href="/categoria/{{ categoria.id }}" class="btn-ver-mais-neon">
+                        VER MAIS <i class="bi bi-arrow-right-short ms-1 fs-5"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <div class="row g-4 mb-5">
+                    {% if categoria.jogos.all %}
+                        {% for jogo in categoria.jogos.all|slice:":4" %}
+                        {% if not jogo.deletado %}
+                        <div class="col-md-6 col-lg-3">
+                            <div class="game-card h-100" style="background: linear-gradient(160deg, #061a4a 0%, #011526 100%); border: 1px solid rgba(4, 138, 191, 0.3); border-radius: 12px; overflow: hidden; transition: transform 0.3s;">
+                                <a href="/jogo/detalhe/{{ jogo.id }}" style="text-decoration: none; color: inherit; display: contents;">
+                                    {% if jogo.icone %}
+                                    <img src="{{ jogo.icone.url }}" class="card-img-top" alt="{{ jogo.nome }}" style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                    <img src="https://via.placeholder.com/300x200?text=Sem+Imagem" class="card-img-top" alt="{{ jogo.nome }}">
+                                    {% endif %}
+                                </a>
+
+                                <div class="card-body d-flex flex-column" style="background: transparent;">
+                                    <span class="text-accent mb-2">
+                                        <i class="bi bi-controller me-1"></i> {{ categoria.nome }}
+                                    </span>
+                                    <h5 class="card-title text-white font-weight-bold">{{ jogo.nome }}</h5>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="mb-3">
+                                            <strong class="game-price" style="color: #048ABF; font-size: 1.3rem;">R$ {{ jogo.preco|floatformat:2 }}</strong>
+                                        </div>
+                                        
+                                        {% if user.is_authenticated %}
+                                            <form method="POST" action="{% url 'adicionar_carrinho' jogo.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn-game">
+                                                    <i class="bi bi-cart-plus me-1"></i> Adicionar
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <a href="{% url 'login' %}" class="btn-game text-center" style="text-decoration: none;">
+                                                <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <p class="text-white">Nenhum jogo nesta categoria.</p>
+                        </div>
+                    {% endif %}
+                </div> 
+
+            {% endif %}
+
+            {% if forloop.counter == 1 and destaque_secundario %}
+            <div class="row justify-content-center mb-5 fade-in">
+            <div class="col-12">
+                <div class="position-relative rounded overflow-hidden shadow-lg" style="min-height: 250px; background: linear-gradient(90deg, #4b0082 0%, #048ABF 100%);">
                     
-                    <div class="d-flex flex-wrap gap-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="gotyCheck">
-                            <label class="form-check-label" for="gotyCheck">
-                                RPG
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="dlcCheck">
-                            <label class="form-check-label" for="dlcCheck">
-                                DLCs
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="multiCheck">
-                            <label class="form-check-label" for="multiCheck">
-                                Multijogador
-                            </label>
-                        </div>
+                    {% if destaque_secundario.icone %}
+                    <div style="position: absolute; top: 0; right: 0; width: 50%; height: 100%; 
+                                background-image: url('{{ destaque_secundario.icone.url }}'); 
+                                background-size: cover; background-position: center; 
+                                opacity: 0.2; mask-image: linear-gradient(to right, transparent, black);">
                     </div>
-                    
-                    <div class="mt-4">
-                        <a href="#games" class="btn btn-primary btn-lg me-3">
-                            <i class="bi bi-joystick"></i> Ver Jogos
-                        </a>
-                        <a href="#deals" class="btn btn-outline-light btn-lg">
-                            <i class="bi bi-percent"></i> Promoções
-                        </a>
+                    {% endif %}
+
+                    <div class="d-flex align-items-center h-100 position-relative p-4 p-md-5">
+                        <div class="col-md-8 text-white">
+                            <span class="badge badge-warning text-dark mb-2 px-3 font-weight-bold" style="font-size: 0.9rem;">
+                                🔥 PRÉ-VENDA / LANÇAMENTO
+                            </span>
+                            <h2 class="display-4 font-weight-bold mb-2" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                                {{ destaque_secundario.nome }}
+                            </h2>
+                            <p class="lead mb-4" style="max-width: 600px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">
+                                Garanta já o seu acesso antecipado! O jogo mais aguardado do ano está chegando.
+                            </p>
+                            
+                            <div class="d-flex align-items-center">
+                                <div class="mr-4">
+                                    <small class="d-block text-light" style="opacity: 0.8">A partir de:</small>
+                                    <span class="h2 font-weight-bold text-warning">R$ {{ destaque_secundario.preco|floatformat:2 }}</span>
+                                </div>
+                                <a href="/jogo/detalhe/{{ destaque_secundario.id }}" class="btn btn-light btn-lg font-weight-bold px-5 shadow-sm" 
+                                style="border-radius: 50px; color: #4b0082;">
+                                    CONFIRA AGORA
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="d-none d-md-block position-absolute" style="right: 50px; top: 50%; transform: translateY(-50%);">
+                            {% if destaque_secundario.icone %}
+                            <img src="{{ destaque_secundario.icone.url }}" alt="{{ destaque_secundario.nome }}" 
+                                class="rounded shadow-lg" style="height: 200px; transform: rotate(5deg); border: 4px solid rgba(255,255,255,0.2);">
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- Main Content -->
-    <div class="container">
-        <!-- Featured Games Section -->
-        <section id="games" class="mb-5">
-            <h2 class="section-title">JOGOS EM DESTAQUE</h2>
-            
-            <div class="row">
-                <!-- Elden Ring -->
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="game-card">
-                        <div class="position-relative">
-                            <img src="https://tse2.mm.bing.net/th/id/OIP.2s0uUJT2jlq5ti-3Z8Ty1wHaHa?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3" 
-                                 alt="Elden Ring - Jogo de RPG e Ação" 
-                                 class="game-img img-loading">
-                            <span class="badge bg-danger position-absolute top-0 end-0 m-2">-30%</span>
-                        </div>
-                        <div class="p-3">
-                            <h3 class="game-title">ELDEN RING</h3>
-                            <p class="game-category">RPG • Ação • Mundo Aberto</p>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div>
-                                    <span class="game-price">R$ 149,90</span>
-                                    <span class="game-old-price ms-2">R$ 214,90</span>
-                                </div>
-                                <span class="badge bg-warning text-dark">GOTY 2022</span>
-                            </div>
-                            <button class="btn-add-cart focus-visible">
-                                <i class="bi bi-cart-plus"></i> Adicionar ao Carrinho
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
- {% endblock %}
+        {% endif %}
+            {% empty %}
+            <div class="alert alert-warning text-center">
+                Nenhuma categoria encontrada.
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

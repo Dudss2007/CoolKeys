@@ -6,15 +6,22 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group # <-- Importação para cadastro usuario do grupo Cliente
 
 def home_view(request):
+    # 1. Jogos do Banner Principal (Carrossel do topo)
+    banner_games = Jogo.objects.filter(banner=True, deletado=False)
+    
+    # 2. Jogo do Banner Secundário (O roxo de Pré-Venda)
+    # AQUI ESTÁ A MUDANÇA: Busca APENAS um jogo da categoria 'pre_lancamento'
+    # Se não tiver nenhum jogo nessa categoria, a variável será None e o banner não aparecerá no HTML.
+    destaque_secundario = Jogo.objects.filter(categoria__nome='Pre lançamento', deletado=False).last()
+
     context = {
-        'jogo': Jogo.objects.all,
-        'categorias': Categoria.objects.all
+        'categorias': Categoria.objects.all(),
+        'banner_games': banner_games,
+        'destaque_secundario': destaque_secundario, # Se for None, o {% if %} do HTML esconde o banner
     }
-    return render(
-        request,
-        'home.html',
-        context
-    )
+    
+    return render(request, 'home.html', context)
+
 
 def cadastro_view(request):
     if request.method == 'POST':
@@ -36,9 +43,9 @@ def cadastro_view(request):
     return render(request,'registration/cadastro.html',{'form': form})
 
 
+
 @login_required
 def adicionar_carrinho(request, jogo_id):
-    """View SIMPLES que funciona"""
     try:
         # 1. Encontra o jogo
         jogo = Jogo.objects.get(id=jogo_id)
@@ -46,7 +53,7 @@ def adicionar_carrinho(request, jogo_id):
         # 2. Pega ou cria carrinho (simplificado)
         carrinho, created = Compra.objects.get_or_create( #created verifica se já existe um carrinho
             usuario=request.user,
-            status='carrinho',
+            status='pendente',
             defaults={'valor_total': 0}
         )
         
@@ -72,39 +79,102 @@ def adicionar_carrinho(request, jogo_id):
         print(f"Erro: {e}")
     
     # 5. REDIRECIONA CORRETAMENTE
-    return redirect('/')
+    return redirect('home')
+@login_required
+def remover_carrinho(request, item_id):
+    # Verifica também se o item pertence a um carrinho do usuário atual (segurança)
+    item = get_object_or_404(ItemCompra, id=item_id, compra__usuario=request.user)
+    
+    # Pega o carrinho antes de deletar o item para poder atualizar o total depois
+    carrinho = item.compra
+    
+    # Deleta o item
+    if item.quantidade > 1:
+        item.quantidade -= 1
+        item.save()
+    else:
+        item.delete()
+    
+    # Recalcula o valor total do carrinho
+    # (Soma os subtotais dos itens restantes)
+    carrinho.valor_total = sum(i.subtotal() for i in carrinho.itens.all())
+    carrinho.save()
+    return redirect('carrinho')
 
 def carrinho_view(request):
-    #Página para visualizar o carrinho ativo
-    # Busca o carrinho ativo (status='carrinho')
-    carrinho = Compra.objects.filter(
-        usuario=request.user,
-        status='carrinho'
-    ).first()
-    
+    # Busca o carrinho ativo (status='pendente')
+    carrinho = Compra.objects.filter(usuario=request.user, status='pendente').first()
+
     # Se não existir carrinho, cria um vazio
     if not carrinho:
-        carrinho = Compra.objects.create(
-            usuario=request.user,
-            status='carrinho',
-            valor_total=0
-        )
-    
+        carrinho = Compra.objects.create(usuario=request.user, status='pendente', valor_total=0)
+    else:
+        # Se já existe, não faz nada, apenas atualiza os itens
+        carrinho.limpar_jogos_deletados()
+        carrinho.atualizar_total()
+
     # Pega todos os itens do carrinho
-    itens_carrinho = carrinho.itens.all() if carrinho else []
+    itens_carrinho = carrinho.itens.all()
+    # Preço antes dos descontos
+    subtotal_sem_desconto = 0
+    for item in itens_carrinho:
+        if item.jogo:
+            # Preço original do jogo × quantidade
+            subtotal_sem_desconto += float(item.jogo.preco) * item.quantidade
+        else:
+            # Usa preco_unitario salvo
+            subtotal_sem_desconto += float(item.preco_unitario or 0) * item.quantidade
     
-    # Calcula total (pode usar o valor_total salvo ou recalcular)
-    total = carrinho.valor_total if carrinho else 0
-    
+    # Calcula total
+    total = carrinho.valor_total
+
     context = {
         'carrinho': carrinho,
         'itens': itens_carrinho,
         'total': total,
+        'subtotal_sem_desconto': subtotal_sem_desconto,
     }
+    return render(request, 'carrinho.html', context)
 
 
-    return render(
-        request,
-        'carrinho.html',
-        context
-    )
+
+
+def detalhe_categoria_view(request, id):
+    # Pega a categoria atual (ex: RPG)
+    categoria = get_object_or_404(Categoria, id=id)
+    
+    # Pega os jogos dessa categoria
+    jogos = categoria.jogos.filter(deletado=False)
+    
+    # Pegamos TODAS as categorias para o menu do topo funcionar
+    todas_categorias = Categoria.objects.all()
+    
+    return render(request, 'categoria_detalhe.html', {
+        'categoria': categoria,
+        'jogos': jogos,
+        'categorias': todas_categorias  # Enviamos para o HTML aqui com o nome que o base.html espera
+    })
+
+def lista_categorias_view(request):
+    # Isso torna a variável 'categorias' disponível em TODO o site
+    return {request, {'categorias': Categoria.objects.all()}}
+
+def jogo_detalhe_view(request, id):
+    jogo = get_object_or_404(Jogo, id=id)
+    
+    # Adicionei .order_by('?') para deixar aleatório
+    jogos_relacionados = Jogo.objects.filter(
+        categoria=jogo.categoria,
+        deletado=False
+    ).exclude(
+        id=id
+    ).order_by('?')[:4] 
+    
+    # Categorias para o menu
+    todas_categorias = Categoria.objects.all()
+
+    return render(request, 'jogo_detalhe.html', {
+        'jogo': jogo,
+        'jogos_relacionados': jogos_relacionados,
+        'categorias': todas_categorias
+    })
