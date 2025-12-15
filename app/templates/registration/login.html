@@ -9,37 +9,47 @@
 </head>
 <body>
 
-<div class="container">
-    <div class="login-box">
-        
-        
-        <div class="image-area">
-            <img src="{% static 'img/image11.png' %}" alt="Login Icon">
+
+<div class="login-page">
+
+    <div class="container">
+        <div class="login-box">
+
+            <div class="image-area">
+                <img src="{% static 'img/image11.png' %}" alt="Login Icon">
+            </div>
+
+            <form>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Senha</label>
+                    <input type="password" required>
+                </div>
+
+                <div class="options">
+                    <label>
+                        <input type="checkbox"> Me lembre
+                    </label>
+                    <a href="#">Esqueceu a senha?</a>
+                </div>
+
+                <button class="btn-login">LOGIN</button>
+
+                <p class="register">
+                    ou <a href="#">Registre-se</a>
+                </p>
+            </form>
+
         </div>
-
-        <form>
-            <div class="input-group">
-                <label>Email </label>
-                <input type="email" required>
-            </div>
-
-            <div class="input-group">
-                <label>Senha</label>
-                <input type="password" required>
-            </div>
-
-            <div class="options">
-                <label><input type="checkbox"> Me lembre</label>
-                <a href="#">Esqueceu a senha?</a>
-            </div>
-
-            <button class="btn-login">LOGIN</button>
-
-            <p class="register">ou  <a href="#">Registre-se</a></p>
-        </form>
-
     </div>
+
 </div>
+
 
 </body>
 </html>
+
