@@ -28,4 +28,4 @@ def carrinho_context(request):
 
 def lista_categorias_view(request):
     # Isso torna a variável 'categorias' disponível em TODO o site
-    return {request, {'categorias': Categoria.objects.all()}}
+    return {'categorias': Categoria.objects.all()}

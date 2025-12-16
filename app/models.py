@@ -1,11 +1,11 @@
 from django.db import models
+import os
 from django.contrib.auth.models import User
 from django.conf import settings
 from decimal import Decimal
 import datetime
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
+from django.utils.text import slugify
 
 # Models para produtos/jogos
 # Categoria:
@@ -80,6 +80,10 @@ class Jogo(models.Model):
             return self.preco * desconto_decimal
         return Decimal('0.00')
     
+    @property
+    def slug_nome(self): # Deixa o nome mais amigável para o sistema
+        return slugify(self.nome)
+    
     def __str__(self):
         # Mostra preço com desconto se houver
         if self.desconto:
@@ -89,40 +93,68 @@ class Jogo(models.Model):
 
 # ==================== IMAGENS DETALHE DE JOGOS ====================
 class ImagemExtra(models.Model):
+    jogo = models.ForeignKey(
+        'Jogo',  
+        on_delete=models.CASCADE, # Se o jogo é deletado imagens também são
+        related_name='imagens_extras'
+    )
+    
+    @staticmethod
     def upload_to_imagem(instance, filename):
-        # Organizador de pastas 
-        ext = filename.split('.')[-1]
-        # Nome do arquivo: 001.jpg, 002.jpg, etc.
-        filename = f"{instance.ordem:03d}.{ext}"
-        return f"jogos/extras/{instance.jogo.slug_nome}/{filename}"
+        # Pega extensão
+        extensao = os.path.splitext(filename)[1].lower()
+
+        nome_jogo = instance.jogo.nome.lower().replace(' ', '-')
+        import re
+        nome_jogo = re.sub(r'[^\w\-]', '', nome_jogo)  # Formata nome do jogo (minúsculo, hífens, remove caracteres especiais)
+        
+        # Impede que duas imagens tenham o mesmo número caso sejam upadas ao mesmo tempo
+        if instance.pk:
+            # Se já existe, usa a ordem salva
+            numero_imagem = instance.ordem
+        else:
+            # Se é nova, conta + 1
+            total = ImagemExtra.objects.filter(jogo=instance.jogo).count()
+            numero_imagem = total + 1
+
+        # Nome do arquivo
+        nome_arquivo = f"{nome_jogo}-{numero_imagem}{extensao}"
+        
+        # Retorna com pasta
+        return f"jogos-extras/{nome_jogo}/{nome_arquivo}"
     
-    jogo = models.ForeignKey(Jogo, on_delete=models.CASCADE, related_name='imagens_extras')
     imagem = models.ImageField(upload_to=upload_to_imagem)
-    legenda = models.CharField(max_length=200, blank=True)
-    ordem = models.IntegerField(default=0, help_text="Ordem para exibição")
-    data_upload = models.DateTimeField(auto_now_add=True)
-    
+    # IMPEDIR ORDEM NEGATIVA ↓
+    ordem = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],  # Não permite valores negativos
+        help_text="Ordem de exibição (0 = primeiro)"
+    )
     class Meta:
-        ordering = ['ordem', '-data_upload']
-    
+        ordering = ['ordem']
+        # Garante que não tenha ordens duplicadas para o mesmo jogo
+        unique_together = ['jogo', 'ordem']
+
     def save(self, *args, **kwargs):
-        # Se não tem ordem, define como última
-        if not self.ordem and self.pk is None:
+        if self.pk is None and self.ordem == 0:
             ultima_ordem = ImagemExtra.objects.filter(jogo=self.jogo).aggregate(
                 models.Max('ordem')
             )['ordem__max'] or 0
             self.ordem = ultima_ordem + 1
         super().save(*args, **kwargs)
-    
     def delete(self, *args, **kwargs):
-        """Deleta o arquivo físico ao deletar do banco"""
-        if self.imagem and os.path.isfile(self.imagem.path):
-            os.remove(self.imagem.path)
+        if self.imagem:
+            try:
+                # Tenta deletar o arquivo
+                if os.path.isfile(self.imagem.path):
+                    os.remove(self.imagem.path)
+            except:
+                # Se der erro, apenas ignora e deleta do banco
+                pass
         super().delete(*args, **kwargs)
     
     def __str__(self):
         return f"{self.jogo.nome} - Imagem #{self.ordem}"
-
 
 # ------- CARRINHO/COMPRAS ------
 class Compra(models.Model): #representa transações em geral, ativas e inativas

@@ -51,6 +51,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'app.context_processors.carrinho_context',
+                'app.context_processors.lista_categorias_view',
             ],
         },
     },
@@ -109,15 +110,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR,'static')]
 
 
 #usuário
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = '/login/'
- #preencher essa chave quando o html estiver pronto
+
 
 #imagens
-
 # Onde os arquivos de upload serão salvos
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # A URL para acessar a pasta MEDIA_ROOT publicamente
 MEDIA_URL = '/media/'

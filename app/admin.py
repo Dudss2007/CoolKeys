@@ -5,3 +5,5 @@ from .models import *  # 1. Importe o Model que você criou
 admin.site.register(Jogo)
 admin.site.register(Categoria)
 admin.site.register(Compra)
+admin.site.register(ItemCompra)
+admin.site.register(ImagemExtra)

@@ -3,6 +3,7 @@ from .models import *  # 1. Importar
 from django.contrib.auth.forms import UserCreationForm #formulário de criação de usuário
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.contrib.auth.models import Group # <-- Importação para cadastro usuario do grupo Cliente
 
 def home_view(request):
@@ -15,7 +16,6 @@ def home_view(request):
     destaque_secundario = Jogo.objects.filter(pre_lancamento=True, deletado=False).last()
 
     context = {
-        'categorias': Categoria.objects.all(),
         'banner_games': banner_games,
         'destaque_secundario': destaque_secundario, # Se for None, o {% if %} do HTML esconde o banner
     }
@@ -36,12 +36,11 @@ def cadastro_view(request):
 
             # Login automático
             login(request, user)
-            return redirect('/')
+            return redirect('')
     else:
         form = UserCreationForm() # Se a informação for inválida
     
     return render(request,'registration/cadastro.html',{'form': form})
-
 
 
 # CARRINHO FUNÇÕES
