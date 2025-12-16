@@ -1,4 +1,7 @@
-:root {
+/* =========================================
+   VARIÁVEIS E PALETA DE CORES
+   ========================================= */
+   :root {
     --cor-destaque: #3D46F2;
     --cor-secundaria: #032CA6;
     --cor-fundo-site: #021E73;
