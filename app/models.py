@@ -62,7 +62,7 @@ class Jogo(models.Model):
 
     icone = models.ImageField(
         upload_to='icones/',
-        default='icones/birdgame.webp',
+        default='icones/birdgame.png',
         null=True, 
         blank=True,
     )
