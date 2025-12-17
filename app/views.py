@@ -188,7 +188,7 @@ def finalizar_compra_view(request):
             carrinho = Compra.objects.filter(
                 usuario=request.user,
                 status='pendente'
-            ).order_by('-data_compra').first()
+            ).order_by('-data_compra')
             
             if carrinho:
                 # 2. Atualiza o status para 'finalizada'
