@@ -1,12 +1,12 @@
 from django.db import models
 import os
-import re
-from django.contrib.auth.models import User
 from django.conf import settings
 from decimal import Decimal
 from django.utils.timezone import now
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
+from django.db import models, transaction
+
 
 # Models para produtos/jogos
 # Categoria:
@@ -23,8 +23,21 @@ class Jogo(models.Model):
     preco = models.DecimalField(max_digits=8, decimal_places=2)
     descricao = models.TextField()
     banner = models.BooleanField(default=False) # Se o jogo é um jogo que aparece no banner
-    pre_lancamento = models.BooleanField(default=False) # Editar isso
-
+    pre_lancamento = models.BooleanField(default=False) # Apenas 1 jogo pode ser marcado, classe para fazer destaque de 1 jogo
+    def save(self, *args, **kwargs):
+        # Se está marcando como pré-lançamento
+        if self.pre_lancamento:
+            with transaction.atomic(): # transaction atomic para prevenir bugs caso dois usuários tentem alterar o estado do jogo ao mesmo tempo
+                Jogo.objects.select_for_update().filter(
+                    pre_lancamento=True
+                )
+                # Atualiza todos os outros para False caso um outro objeto se torne o pre-lançamento
+                Jogo.objects.exclude(pk=self.pk).filter(
+                    pre_lancamento=True
+                ).update(pre_lancamento=False)
+        
+        # Salva normalmente (dentro da transação se for pré-lançamento)
+        super().save(*args, **kwargs)
     deletado = models.BooleanField(default=False) # Soft delete
     autoria = models.CharField(max_length=200, default='Desconhecido') # Desenvolvedora, caso fique vazio default
     lancamento = models.DateField(default=now) # Caso fique vazio a data será a data da criação do objeto
@@ -54,10 +67,8 @@ class Jogo(models.Model):
         blank=True,
     )
 
-    categoria = models.ForeignKey(
+    categoria =  models.ManyToManyField(
         Categoria, 
-        on_delete=models.SET_NULL,  # ou models.PROTECT se preferir, se a categoria for deletada os jogos não são
-        null=True, 
         blank=True,
         related_name='jogos'  # opcional: para acessar jogos de uma categoria
     ) #Fazer logica de mais de uma

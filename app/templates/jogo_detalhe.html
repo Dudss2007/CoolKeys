@@ -8,9 +8,16 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb" style="background: transparent; padding-left: 0;">
             <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-muted">Home</a></li>
-            {% if jogo.categoria %}
-            <li class="breadcrumb-item"><a href="/categoria/{{ jogo.categoria.id }}" class="text-decoration-none text-muted">{{ jogo.categoria.nome }}</a></li>
+            {% with primeira_categoria=jogo.categoria.first %}
+            {% if primeira_categoria %}
+                <li class="breadcrumb-item">
+                    {# NOTE: Substituí a URL estática por uma URL nomeada, assumindo que você criou 'detalhe_categoria' #}
+                    <a href="{% url 'detalhe_categoria' primeira_categoria.id %}" class="text-decoration-none text-muted">
+                        {{ primeira_categoria.nome }}
+                    </a>
+                </li>
             {% endif %}
+            {% endwith %}
             <li class="breadcrumb-item active text-light" aria-current="page">{{ jogo.nome }}</li>
         </ol>
     </nav>
@@ -40,11 +47,11 @@
                 
                 <h1 class="game-title text-white fw-bold display-5 mb-2">{{ jogo.nome }}</h1>
                 
-                <div class="mb-4">
-                    {% if jogo.categoria %}
-                    <span class="badge bg-primary">{{ jogo.categoria.nome }}</span>
-                    {% endif %}
-                </div>
+            <div class="mb-4">
+                    {% for cat in categorias_atuais %}
+                        <span class="badge bg-primary">{{ cat.nome }}</span>
+                    {% endfor %}
+            </div>
                 
                 <div class="p-4 rounded mb-auto" style="background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);">
                     

@@ -22,7 +22,8 @@ from django.conf import settings #importações para imagens
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('app.urls')),
-    path('accounts/', include('django.contrib.auth.urls')), #contas
+    path("administrador/", include("painel_controle.urls")),
+    path('dashboard/', include('django.contrib.auth.urls')), #contas
 ]
 
 #Para o Pillow funcionar:

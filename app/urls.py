@@ -14,8 +14,6 @@ urlpatterns = [
     path('control/painel/', views.dashboard_admin_view, name='dashboard_admin'),
     path('perfil/', views.perfil_view, name='perfil'),
     path('cadastro/', views.cadastro_view, name='cadastro'),
-    path('login/', auth_views.LoginView.as_view(
-        template_name='registration/login.html'
-    ), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
 ]

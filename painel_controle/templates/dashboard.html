@@ -1,0 +1,85 @@
+{% extends 'admin_base.html' %}
+
+{% block titulo %}Dashboard{% endblock %}
+
+{% block conteudo %}
+<div class="dashboard-content">
+    <!-- Cabeçalho -->
+    <div class="dashboard-header">
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+        <p>Visão geral do sistema</p>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row stats-cards">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card bg-primary">
+                <div class="stat-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>150</h3>
+                    <p>Produtos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card bg-success">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>1,234</h3>
+                    <p>Usuários</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card bg-warning">
+                <div class="stat-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>89</h3>
+                    <p>Pedidos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card bg-info">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>R$ 12.580</h3>
+                    <p>Faturamento</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensagem de Boas-vindas -->
+    <div class="welcome-card">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-info-circle"></i> Bem-vindo ao Painel Administrativo</h5>
+                <p class="card-text">
+                    Gerencie seus produtos, usuários, pedidos e configurações de forma centralizada.
+                    Use o menu lateral para navegar entre as seções do sistema.
+                </p>
+                <div class="alert alert-light mt-3">
+                    <small><i class="fas fa-lightbulb"></i> Dica: Você pode visualizar relatórios detalhados na seção "Relatórios".</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="admin-footer">
+        <p class="mb-0">
+            <i class="fas fa-shield-alt"></i> © 2024 CoolKeys Admin Dashboard - Área Restrita
+        </p>
+        <small class="text-muted">Último acesso: Hoje às {{ "now"|date:"H:i" }}</small>
+    </footer>
+</div>
+{% endblock %}

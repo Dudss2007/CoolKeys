@@ -13,11 +13,11 @@ def home_view(request):
     # 2. Jogo do Banner Secundário (O roxo de Pré-Venda)
     # AQUI ESTÁ A MUDANÇA: Busca APENAS um jogo da categoria 'pre_lancamento'
     # Se não tiver nenhum jogo nessa categoria, a variável será None e o banner não aparecerá no HTML.
-    destaque_secundario = Jogo.objects.filter(pre_lancamento=True, deletado=False).last()
+    pre_venda = Jogo.objects.filter(pre_lancamento=True, deletado=False).last()
 
     context = {
         'banner_games': banner_games,
-        'destaque_secundario': destaque_secundario, # Se for None, o {% if %} do HTML esconde o banner
+        'pre_venda': pre_venda, 
     }
     
     return render(request, 'home.html', context)
@@ -200,21 +200,35 @@ def detalhe_categoria_view(request, id):
 def jogo_detalhe_view(request, id):
     jogo = get_object_or_404(Jogo, id=id)
     
-    # Adicionei .order_by('?') para deixar aleatório
+    # 1. Obter os IDs de todas as categorias do jogo atual
+    # Se o jogo não tiver categorias, este QuerySet estará vazio.
+    categorias_do_jogo = jogo.categoria.all()
+    
+    # 2. Filtrar JOGOS RELACIONADOS
+    # Usa 'categoria__in' para encontrar outros jogos que pertençam a QUALQUER UMA 
+    # das categorias do jogo atual.
     jogos_relacionados = Jogo.objects.filter(
-        categoria=jogo.categoria,
+        # Filtra jogos cuja categoria esteja na lista de categorias do jogo atual
+        categoria__in=categorias_do_jogo, 
         deletado=False
     ).exclude(
-        id=id
+        # Exclui o jogo que está sendo visualizado
+        id=jogo.id 
+    ).distinct(
+        # Adiciona distinct() para evitar duplicatas se um jogo tiver duas categorias em comum
     ).order_by('?')[:4] 
     
-    # Categorias para o menu
+    # Categorias para o menu (corrigido para o problema do template abaixo)
     todas_categorias = Categoria.objects.all()
+
+    # Passa as categorias do jogo atual para facilitar o loop no template (Passo C)
+    categorias_atuais = jogo.categoria.all() 
 
     return render(request, 'jogo_detalhe.html', {
         'jogo': jogo,
         'jogos_relacionados': jogos_relacionados,
-        'categorias': todas_categorias
+        'categorias': todas_categorias, # Para a navbar/menu
+        'categorias_atuais': categorias_atuais # Para as tags do jogo atual
     })
 
 @login_required
