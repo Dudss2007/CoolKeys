@@ -16,94 +16,131 @@
 <body class="d-flex flex-column min-vh-100">
 
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #011526;"> 
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <img class="pl-2" src="{% static 'img/image11.png' %}" alt="Logo" style="height: 40px; width: auto;">
-            </a>
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #011526;"> 
+    <div class="container-fluid px-0 px-sm-3">
+        
+        {# LOGO #}
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img class="pl-2" src="{% static 'img/image11.png' %}" alt="Logo" style="height: 40px; width: auto;">
+        </a>
+        
+        {# NOVO: ITENS DE AÇÃO VISÍVEIS FORA DO COLLAPSE (PARA MOBILE) #}
+        <div class="d-flex order-lg-3 align-items-center">
+            
+            {# 1. Ícone do Carrinho (Visível em Mobile) #}
+            <li class="nav-item list-unstyled mr-3 d-lg-none"> {# Oculta no desktop, mostra no mobile #}
+                <a class="nav-link cart-link-container" href="{% url 'carrinho' %}" style="padding-right: 0;">
+                    <i class="fas fa-shopping-cart fa-lg text-white"></i>
+                    {% if total_itens_carrinho > 0 %}
+                    <span class="badge-posicao-fixa">
+                        +{{ total_itens_carrinho }}
+                    </span>
+                    {% endif %}
+                </a>
+            </li>
 
+            {# 2. Ícone do Usuário (Visível em Mobile) #}
+            <li class="nav-item dropdown list-unstyled d-lg-none"> {# Oculta no desktop, mostra no mobile #}
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" style="padding-right: 0;">
+                    <i class="fas fa-user fa-lg text-white"></i>
+                </a>
+                {# O conteúdo do dropdown-menu é o mesmo de baixo #}
+                <div class="dropdown-menu dropdown-menu-right">
+                    {# ... CONTEÚDO DO DROPDOWN DO USUÁRIO AQUI ... #}
+                    <div>
+                        {% if user.is_authenticated %}
+                            <h6 class="dropdown-header">Olá, {{ user.username }}</h6>
+                            <a class="dropdown-item" href="{% url 'perfil' %}"><i class="fas fa-id-card fa-fw mr-2"></i> Perfil</a>
+                            {% if user.is_superuser or user.groups.all.0.name == 'admin_staff' %}
+                            <a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt fa-fw mr-2"></i> Dashboard Admin</a>
+                            {% endif %}
+                            <div class="dropdown-divider"></div>
+                            <form method="post" action="{% url 'logout' %}" style="margin-bottom: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt fa-fw mr-2"></i> Sair</button>
+                            </form>
+                        {% else %}
+                            <h6 class="dropdown-header">Bem-vindo(a)!</h6>
+                            <a class="dropdown-item" href="{% url 'login' %}"><i class="fas fa-sign-in-alt fa-fw mr-2"></i> Entrar</a>
+                            <a class="dropdown-item" href="{% url 'cadastro' %}"><i class="fas fa-user-plus fa-fw mr-2"></i> Cadastrar</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            
+            {# BOTÃO DO MENU HAMBÚRGUER #}
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
-            <div class="collapse navbar-collapse justify-content-between w-100" id="navbarMain">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Promoções</a></li>
-                    
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Categorias</a>
-                        <div class="dropdown-menu">
-                            {% for categoria in categorias %}
-                                <a href="{% url 'detalhe_categoria' categoria.id %}" class="dropdown-item">{{ categoria.nome }}</a>
-                            {% endfor %}
-                        </div>
-                    </li>
-                </ul>
+        </div>
+
+
+        {# CONTEÚDO PRIMÁRIO (COLAPSO) #}
+        <div class="collapse navbar-collapse order-lg-2" id="navbarMain">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
                 
-              <form action="{% url 'resultado_pesquisa' %}" method="get" class="form-inline mx-auto my-2 my-lg-0"> 
-                    <input id="search-input" name="q" class="form-control" type="search" placeholder="Buscar jogo..." style="width: 400px; border-radius: 50px;">
-                    <button type="submit" style="display: none;">Buscar</button>
-                </form>
+                {# DROPDOWN CATEGORIAS #}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Categorias</a>
+                    <div class="dropdown-menu">
+                        {% for categoria in categorias %}
+                            <a href="{% url 'detalhe_categoria' categoria.id %}" class="dropdown-item">{{ categoria.nome }}</a>
+                        {% endfor %}
+                    </div>
+                </li>
+            </ul>
 
-                <ul class="navbar-nav align-items-center"> 
-                    <li class="nav-item mr-3">
-                        <a class="nav-link cart-link-container" href="{% url 'carrinho' %}">
-                            <i class="fas fa-shopping-cart fa-lg"></i>
-                            
-                            {% if total_itens_carrinho > 0 %}
-                            <span class="badge-posicao-fixa">
-                                +{{ total_itens_carrinho }}
-                            </span>
-                            {% endif %}
-                        </a>
-                    </li>
+            {# BUSCA (Ajustada) - Aparece no Desktop e dentro do collapse no Mobile #}
+            <form action="{% url 'resultado_pesquisa' %}" method="get" class="form-inline mx-lg-auto my-2 my-lg-0 w-100" style="max-width: 400px;"> 
+                {# AQUI ESTÁ A CORREÇÃO PRINCIPAL DE LARGURA #}
+                <input id="search-input" name="q" class="form-control w-100" type="search" placeholder="Buscar jogo..." style="border-radius: 50px;">
+                <button type="submit" style="display: none;">Buscar</button>
+            </form>
 
-               
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
-                            <i class="fas fa-user fa-lg"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            
+            {# UTILITÁRIOS (Carrinho e Usuário) - VISÍVEL APENAS NO DESKTOP (d-none d-lg-flex) #}
+            <ul class="navbar-nav align-items-center d-none d-lg-flex"> 
+                <li class="nav-item mr-3">
+                    <a class="nav-link cart-link-container" href="{% url 'carrinho' %}" style="padding-right: 0;">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        {% if total_itens_carrinho > 0 %}
+                        <span class="badge-posicao-fixa">
+                            +{{ total_itens_carrinho }}
+                        </span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" style="padding-right: 0;">
+                        <i class="fas fa-user fa-lg"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        {# ... CONTEÚDO DO DROPDOWN DO USUÁRIO AQUI ... #}
+                        <div>
                             {% if user.is_authenticated %}
-
                                 <h6 class="dropdown-header">Olá, {{ user.username }}</h6>
-                                <a class="dropdown-item" href="{% url 'perfil' %}">
-                                    <i class="fas fa-id-card fa-fw mr-2"></i> Perfil
-                                </a>
-                                
-                                {% if user.is_superuser or user.groups.all.0.name == 'adm' %}
-                                <a class="dropdown-item" href="{% url 'dashboard' %}">
-                                    <i class="fas fa-tachometer-alt fa-fw mr-2"></i> Dashboard Admin
-                                </a>
+                                <a class="dropdown-item" href="{% url 'perfil' %}"><i class="fas fa-id-card fa-fw mr-2"></i> Perfil</a>
+                                {% if user.is_superuser or user.groups.all.0.name == 'admin_staff' %}
+                                <a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt fa-fw mr-2"></i> Dashboard Admin</a>
                                 {% endif %}
-                                
                                 <div class="dropdown-divider"></div>
-                                
-
                                 <form method="post" action="{% url 'logout' %}" style="margin-bottom: 0;">
                                     {% csrf_token %}
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt fa-fw mr-2"></i> Sair
-                                    </button>
+                                    <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt fa-fw mr-2"></i> Sair</button>
                                 </form>
-                                
                             {% else %}
                                 <h6 class="dropdown-header">Bem-vindo(a)!</h6>
-                                
-                                <a class="dropdown-item" href="{% url 'login' %}">
-                                    <i class="fas fa-sign-in-alt fa-fw mr-2"></i> Entrar
-                                </a>
-                                <a class="dropdown-item" href="{% url 'cadastro' %}">
-                                    <i class="fas fa-user-plus fa-fw mr-2"></i> Cadastrar
-                                </a>
+                                <a class="dropdown-item" href="{% url 'login' %}"><i class="fas fa-sign-in-alt fa-fw mr-2"></i> Entrar</a>
+                                <a class="dropdown-item" href="{% url 'cadastro' %}"><i class="fas fa-user-plus fa-fw mr-2"></i> Cadastrar</a>
                             {% endif %}
-                            
                         </div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
     </header>
     
     <div class="container-fluid flex-grow-1 p-0">
@@ -116,8 +153,8 @@
             <p class="col-md-4 mb-0 text-muted">© 2025 CoolKeys</p>
 
             <div class="col-md-4 d-flex align-items-center justify-content-center">
-                <a href="#" class="text-muted mr-3"><i class="fab fa-instagram fa-2x"></i></a>
-                <a href="#" class="text-muted"><i class="fab fa-github fa-2x"></i></a>
+                <a href="https://www.instagram.com/ian__lamartine/" class="text-muted mr-3"><i class="fab fa-instagram fa-2x"></i></a>
+                <a href="https://github.com/IanSeed/CoolKeys/tree/main" class="text-muted"><i class="fab fa-github fa-2x"></i></a>
             </div>
 
             <ul class="nav col-md-4 justify-content-end">
@@ -142,7 +179,7 @@
                 source: "{% url 'autocomplete_search' %}",
                 minLength: 2,
                 select: function(event, ui) {
-                    window.location.href = '/jogo_detalhe/' + ui.item.id; 
+                    window.location.href = '/jogo/detalhe/' + ui.item.id; 
                     return false;
                 }
             })

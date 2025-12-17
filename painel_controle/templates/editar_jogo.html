@@ -1,0 +1,139 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block conteudo %}
+<div class="container py-4">
+    <h2 class="text-white mb-4"><i class="fas fa-edit me-2"></i> Editando Jogo: {{ jogo.nome }}</h2>
+
+    <form action="{% url 'editar_jogo' jogo.id %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-section mb-5">
+            <div class="section-title">
+                <i class="fas fa-gamepad"></i>
+                <h3>Identidade do Jogo</h3>
+            </div>
+            
+            <div class="form-grid gap-4"> 
+                <div class="form-group">
+                    <label for="nome" class="required">Nome do Jogo</label>
+                    <input type="text" name="nome" id="nome" class="form-control" value="{{ jogo.nome }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="autoria">Desenvolvedora</label>
+                    <input type="text" name="autoria" id="autoria" class="form-control" value="{{ jogo.autoria }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="lancamento">Data de Lançamento</label>
+                    <input type="date" name="lancamento" id="lancamento" class="form-control" value="{{ jogo.lancamento|date:'Y-m-d' }}">
+                </div>
+            </div>
+            
+            <div class="form-group mt-5"> 
+                <label for="descricao" class="required">Descrição (Tamanho Fixo)</label>
+                <textarea name="descricao" id="descricao" class="form-control" style="min-height: 150px; resize: none;" required>{{ jogo.descricao }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section mb-5">
+            <div class="section-title">
+                <i class="fas fa-tags"></i>
+                <h3>Gêneros e Categorias</h3>
+            </div>
+            
+            <div class="form-group">
+                <label class="required">Categorias (As já selecionadas estão marcadas)</label>
+                <select name="categoria" id="categoria" class="form-control" multiple style="height: 180px;">
+                    {% for cat in categorias %}
+                        <option value="{{ cat.id }}" 
+                            {% if cat in jogo.categoria.all %}selected{% endif %}>
+                            {{ cat.nome }}
+                        </option>
+                    {% empty %}
+                        <option disabled>Nenhuma categoria cadastrada.</option>
+                    {% endfor %}
+                </select>
+                <small class="text-muted mt-2 d-block">Segure a tecla CTRL (ou CMD) para alterar as seleções.</small>
+            </div>
+        </div>
+
+        <div class="form-section mb-5">
+            <div class="section-title">
+                <i class="fas fa-images"></i>
+                <h3>Mídia e Galeria</h3>
+            </div>
+            
+            <div class="row g-5">
+                <div class="col-md-6">
+                    <label class="fw-bold text-white mb-2">CAPA PRINCIPAL ATUAL</label>
+                    <div class="mb-3">
+                        <img src="{{ jogo.icone.url }}" class="img-thumbnail bg-dark border-info" style="width: 200px; height: 120px; object-fit: cover;">
+                    </div>
+                    <input type="file" name="icone" class="form-control">
+                    <small class="text-muted">Substitua apenas se desejar trocar a capa.</small>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="fw-bold text-white mb-2">GALERIA ATUAL</label>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        {% for img in jogo.imagens_extras.all %}
+                            <img src="{{ img.imagem.url }}" class="img-thumbnail bg-dark border-secondary" style="width: 70px; height: 50px; object-fit: cover;" title="Imagem #{{ img.ordem }}">
+                        {% empty %}
+                            <p class="text-muted small">Nenhuma imagem na galeria.</p>
+                        {% endfor %}
+                    </div>
+                    <input type="file" name="imagens_extras" class="form-control" multiple>
+                    <small class="text-muted">Selecione novos arquivos para ADICIONAR à galeria.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section mb-5">
+            <div class="section-title">
+                <i class="fas fa-dollar-sign"></i>
+                <h3>Preço e Visibilidade</h3>
+            </div>
+            <div class="row g-5">
+                <div class="col-md-6 border-end border-secondary">
+                    <div class="form-group">
+                        <label>Preço Base (R$)</label>
+                        <input type="number" name="preco" step="0.01" class="form-control" value="{{ jogo.preco|stringformat:'.2f' }}">
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Desconto (%)</label>
+                        <input type="number" name="desconto" class="form-control" value="{{ jogo.desconto|default:0 }}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="mb-3 d-block text-info">Configurações de Destaque</label>
+                    <div class="switch-group p-3">
+                        <div class="form-check form-switch mb-3">
+                            <label class="form-check-label text-white">Exibir no Banner Principal</label>
+                            <input class="form-check-input" type="checkbox" name="banner" {% if jogo.banner %}checked{% endif %}>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <label class="form-check-label text-white">Destaque de Pré-Venda</label>
+                            <input class="form-check-input" type="checkbox" name="pre_lancamento" {% if jogo.pre_lancamento %}checked{% endif %}>
+                        </div>
+                        <div class="form-check form-switch">
+                            <label class="form-check-label text-warning">Ocultar Jogo do Site</label>
+                            <input class="form-check-input" type="checkbox" name="deletado" {% if jogo.deletado %}checked{% endif %}>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 mb-5 mt-4">
+            <a href="{% url 'dashboard_admin' %}" class="btn-cancel-custom text-decoration-none">
+                <i class="fas fa-times me-2"></i> CANCELAR
+            </a>
+            <button type="submit" class="btn-save-neon">
+                <i class="fas fa-save me-2"></i> SALVAR ALTERAÇÕES
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

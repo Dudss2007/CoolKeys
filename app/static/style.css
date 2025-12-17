@@ -1842,3 +1842,34 @@ html, body {
     font-weight: 700;
     color: var(--texto-branco);
 }
+
+/* Altura Padrão (Telas Grandes e Médias) */
+.banner-responsive-wrapper {
+    height: 450px; /* Altura original para telas grandes */
+    overflow: hidden;
+}
+
+/* Reduz a altura drasticamente em telas pequenas (até 576px, que é o 'sm' do Bootstrap) */
+@media (max-width: 575.98px) {
+    .banner-responsive-wrapper {
+        height: 300px; /* Reduz a altura para que não ocupe a tela inteira */
+    }
+}
+
+/* Garante que a imagem preencha o wrapper corretamente */
+.banner-img-cover {
+    position: absolute; /* Essencial para que a altura do wrapper funcione */
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+/* Oculta o caption grande em telas pequenas, ele é substituído pelo caption mobile */
+.banner-caption-position {
+    display: none !important; 
+}
+@media (min-width: 576px) {
+    .banner-caption-position {
+        display: block !important;
+    }
+}

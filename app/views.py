@@ -1,20 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import *  # 1. Importar
-from django.contrib.auth.forms import UserCreationForm #formulário de criação de usuário
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
 from django.contrib.auth.models import Group # <-- Importação para cadastro usuario do grupo Cliente
 from django.db.models import Q
 from django.http import JsonResponse
-
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import *  # 1. Importar
-from django.contrib.auth.forms import UserCreationForm #formulário de criação de usuário
-from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.contrib.auth.models import Group # <-- Importação para cadastro usuario do grupo Cliente
+from django.contrib import messages
+from django.contrib.auth.models import User
 
 def home_view(request):
     # 1. Jogos do Banner Principal (Carrossel do topo)
@@ -35,22 +27,53 @@ def home_view(request):
 
 def cadastro_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            
-            # --- LÓGICA DE GRUPO ---
-            # Pega o grupo "Client". 
-            grupo_client = Group.objects.get(name='Client')
-            user.groups.add(grupo_client)
+        # 1. Captura os dados do formulário manual
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password_1 = request.POST.get('password1')
+        password_2 = request.POST.get('password2')
+        
+        # 2. Validação básica
+        if password_1 != password_2:
+            messages.error(request, "As senhas não coincidem.")
+            return render(request, 'registration/cadastro.html')
+        
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Este nome de usuário já está em uso.")
+            return render(request, 'registration/cadastro.html')
 
-            # Login automático
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Este e-mail já está em uso.")
+            return render(request, 'registration/cadastro.html')
+
+        try:
+            # 3. Cria o usuário com a função create_user para hashear a senha
+            user = User.objects.create_user(
+                username=username, 
+                email=email, 
+                password=password_1
+            )
+            
+            # 4. LÓGICA DE GRUPO
+            try:
+                grupo_client = Group.objects.get(name='Client')
+                user.groups.add(grupo_client)
+            except Group.DoesNotExist:
+                pass 
+
+            # 5. Login automático e redirecionamento
             login(request, user)
-            return redirect('')
+            messages.success(request, "Cadastro realizado com sucesso!")
+            return redirect('home')
+        
+        except Exception as e:
+            # Captura erros mais complexos de validação (e-mail inválido, etc.)
+            messages.error(request, f"Erro no cadastro: {e}")
+            return render(request, 'registration/cadastro.html')
+        
     else:
-        form = UserCreationForm() # Se a informação for inválida
-    
-    return render(request,'registration/cadastro.html',{'form': form})
+        # Renderiza o template GET
+        return render(request, 'registration/cadastro.html')
 
 
 # CARRINHO FUNÇÕES
@@ -198,13 +221,9 @@ def detalhe_categoria_view(request, id):
     # Pega os jogos dessa categoria
     jogos = categoria.jogos.filter(deletado=False)
     
-    # Pegamos TODAS as categorias para o menu do topo funcionar
-    todas_categorias = Categoria.objects.all()
-    
     return render(request, 'categoria_detalhe.html', {
         'categoria': categoria,
         'jogos': jogos,
-        'categorias': todas_categorias  # Enviamos para o HTML aqui com o nome que o base.html espera
     })
 
 def jogo_detalhe_view(request, id):
@@ -339,13 +358,12 @@ def resultado_pesquisa_view(request):
     
     # IMPORTANTE: Você precisa garantir que a função get_total_carrinho exista e esteja importada/definida.
         
-    categorias = Categoria.objects.all()
 
     context = {
         'query': query,
         'jogos': jogos,
     }
-    return render(request, 'resultado_pesquisa.html',)
+    return render(request, 'resultado_pesquisa.html', context)
 def suporte_view(request):
     # Adicione o contexto necessário para o base.html (categorias e carrinho)
 

@@ -1,0 +1,311 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block titulo %}Adicionar Novo Jogo{% endblock %}
+
+{% block pagina_titulo %}Adicionar Novo Jogo{% endblock %}
+
+{% block breadcrumb %}
+<i class="fas fa-chevron-right"></i>
+<span>Jogos</span>
+<i class="fas fa-chevron-right"></i>
+<span>Adicionar Novo</span>
+{% endblock %}
+
+{% block conteudo %}
+<div class="container py-4">
+    <div class="alert alert-info border-0 bg-dark text-white mb-4">
+        <i class="fas fa-info-circle me-2 text-info"></i>
+        Campos marcados com <span class="text-danger">*</span> são de preenchimento obrigatório.
+    </div>
+
+    <form action="{% url 'criar_jogo' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-section mb-5">
+            <div class="section-title">
+                <i class="fas fa-gamepad"></i>
+                <h3>Identidade do Jogo</h3>
+            </div>
+            
+            <div class="form-grid gap-4"> 
+                <div class="form-group">
+                    <label for="nome" class="required">Nome do Jogo</label>
+                    <input type="text" name="nome" id="nome" class="form-control" placeholder="Ex: God of War" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="autoria">Desenvolvedora / Autor</label>
+                    <input type="text" name="autoria" id="autoria" class="form-control" placeholder="Ex: Santa Monica Studio" value="CoolKeys">
+                </div>
+
+                <div class="form-group">
+                    <label for="lancamento">Data de Lançamento</label>
+                    <input type="date" name="lancamento" id="lancamento" class="form-control" value="{% now 'Y-m-d' %}">
+                </div>
+            </div>
+            
+            <div class="form-group mt-5"> <label for="descricao" class="required">Sobre o Jogo (Descrição)</label>
+                <textarea name="descricao" id="descricao" class="form-control" style="min-height: 150px; resize: none;" placeholder="Explique do que se trata o jogo, história e mecânicas..." required></textarea>
+            </div>
+        </div>
+        
+        <div class="form-section mb-5">
+            <div class="section-title">
+                <i class="fas fa-tags"></i>
+                <h3>Gêneros e Categorias</h3>
+            </div>
+            
+            <div class="form-group">
+                <label class="required">Selecione as Categorias</label>
+                <select name="categoria" id="categoria" class="form-control" multiple style="height: 180px;">
+                    {% for cat in categorias %}
+                        <option value="{{ cat.id }}">{{ cat.nome }}</option>
+                    {% empty %}
+                        <option disabled>Nenhuma categoria cadastrada no sistema.</option>
+                    {% endfor %}
+                </select>
+                <small class="text-muted mt-2 d-block text-white">Segure a tecla CTRL (no Windows) ou CMD (no Mac) para escolher mais de uma opção.</small>
+            </div>
+        </div>
+        
+        <div class="form-section mb-5">
+            <div class="section-title">
+                <i class="fas fa-dollar-sign"></i>
+                <h3>Preço e Arquivos de Imagem</h3>
+            </div>
+            
+            <div class="row g-5 mb-4"> <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="preco" class="required">Valor Base (R$)</label>
+                        <input type="number" name="preco" id="preco" step="0.01" class="form-control" placeholder="0,00" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="desconto">Porcentagem de Desconto (%)</label>
+                        <input type="number" name="desconto" id="desconto" min="0" max="100" class="form-control" value="0">
+                    </div>
+                </div>
+            </div>
+
+<div class="row g-5"> 
+                
+                {# === CAPA PRINCIPAL === #}
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="icone" class="required">Foto da Capa (Principal)</label>
+                        <input type="file" name="icone" id="icone" class="d-none" accept="image/*" required> 
+                        <div id="preview-icone-container" class="preview-area preview-capa" onclick="document.getElementById('icone').click()">
+                            <i id="icon-capa-placeholder" class="fas fa-image fa-3x text-muted"></i>
+                            <p class="text-muted small m-0 mt-2">Clique para adicionar Capa (Proporção 16:9 ideal)</p>
+                            <img id="preview-icone" src="#" alt="Pré-visualização da Capa" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+                
+                {# === GALERIA (MÚLTIPLAS FOTOS) === #}
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="imagens_extras">Fotos da Galeria (Múltiplas)</label>
+                        <input type="file" name="imagens_extras" id="imagens_extras" class="d-none" accept="image/*" multiple>
+                        
+                        <div id="preview-galeria-container" class="preview-area preview-galeria">
+                            
+                            <div id="add-photo-button" class="thumbnail-item add-button" onclick="document.getElementById('imagens_extras').click()">
+                                <i class="fas fa-plus fa-lg"></i>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        <div class="form-section mb-5">
+            <div class="section-title">
+                <i class="fas fa-eye"></i>
+                <h3>Onde o jogo vai aparecer?</h3>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="switch-group">
+                        <div class="form-check form-switch admin-switch mb-3">
+                            <label class="form-check-label text-white" for="banner">Exibir no Carrossel do Topo (Banner)</label>
+                            <input class="form-check-input" type="checkbox" name="banner" id="banner">
+                        </div>
+                        
+                        <div class="form-check form-switch admin-switch mb-3">
+                            <label class="form-check-label text-white" for="pre_lancamento">Marcar como Jogo de Pré-Venda</label>
+                            <input class="form-check-input" type="checkbox" name="pre_lancamento" id="pre_lancamento">
+                        </div>
+
+                        <div class="form-check form-switch admin-switch">
+                            <label class="form-check-label text-warning" for="deletado">Ocultar Jogo (Desativar do Site)</label>
+                            <input class="form-check-input" type="checkbox" name="deletado" id="deletado">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 mb-5 mt-4">
+            <a href="{% url 'dashboard_admin' %}" class="btn-cancel-custom">
+                <i class="fas fa-times me-2"></i> Descartar e Sair
+            </a>
+            <button type="submit" class="btn-save-neon">
+                <i class="fas fa-check-circle me-2"></i> Criar Jogo Agora
+            </button>
+        </div>
+    </form>
+</div> 
+<!--Preview da imagem em javascript-->
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Array global para armazenar os arquivos da Galeria selecionados
+    let galleryFiles = []; 
+
+    // --- Elementos DOM ---
+    // Capa Principal (Ícone)
+    const iconeInput = document.getElementById('icone');
+    const previewIconeImg = document.getElementById('preview-icone');
+    const previewIconeContainer = document.getElementById('preview-icone-container');
+    const iconCapaPlaceholder = document.getElementById('icon-capa-placeholder');
+    const textCapaPlaceholder = previewIconeContainer.querySelector('p');
+
+    // Galeria (Múltiplas Fotos)
+    const galeriaInput = document.getElementById('imagens_extras');
+    const previewGaleriaContainer = document.getElementById('preview-galeria-container');
+    const addPhotoButton = document.getElementById('add-photo-button');
+
+    // --- FUNÇÕES DE PREVIEW ---
+
+    function updateIconePreview(file) {
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                iconCapaPlaceholder.style.display = 'none';
+                textCapaPlaceholder.style.display = 'none';
+                previewIconeImg.src = e.target.result;
+                previewIconeImg.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewIconeImg.src = '#';
+            previewIconeImg.style.display = 'none';
+            iconCapaPlaceholder.style.display = 'block';
+            textCapaPlaceholder.style.display = 'block';
+        }
+    }
+
+    function updateGaleriaPreview() {
+        // Limpa todas as miniaturas atuais, mas preserva o botão "+"
+        let existingThumbs = previewGaleriaContainer.querySelectorAll('.thumbnail-item:not(.add-button)');
+        existingThumbs.forEach(thumb => thumb.remove());
+
+        if (galleryFiles.length > 0) {
+            
+            // Re-renderiza todas as miniaturas do array 'galleryFiles'
+            galleryFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const thumbnailDiv = document.createElement('div');
+                    thumbnailDiv.className = 'thumbnail-item';
+                    thumbnailDiv.dataset.index = index; // Adiciona o índice para remoção
+                    
+                    const thumbnailImg = document.createElement('img');
+                    thumbnailImg.src = e.target.result;
+                    thumbnailImg.alt = 'Miniatura da Galeria';
+                    
+                    // Ícone de Remoção
+                    const removeBtn = document.createElement('div');
+                    removeBtn.className = 'remove-btn';
+                    removeBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+                    removeBtn.onclick = function() { removeGalleryFile(index); };
+
+                    thumbnailDiv.appendChild(thumbnailImg);
+                    thumbnailDiv.appendChild(removeBtn);
+
+                    // Insere a miniatura antes do botão de adicionar (+)
+                    previewGaleriaContainer.insertBefore(thumbnailDiv, addPhotoButton);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    function removeGalleryFile(index) {
+        // Remove o arquivo do array
+        galleryFiles.splice(index, 1);
+        
+        // Atualiza o FileList do input (fundamental para o Django receber a lista correta)
+        updateFileInput(galeriaInput, galleryFiles);
+        
+        // Atualiza o visual
+        updateGaleriaPreview();
+    }
+    
+    // FUNÇÃO CHAVE: Cria um novo FileList com os arquivos acumulados e atribui ao input
+    function updateFileInput(inputElement, filesArray) {
+        const dataTransfer = new DataTransfer();
+        filesArray.forEach(file => dataTransfer.items.add(file));
+        inputElement.files = dataTransfer.files;
+    }
+
+
+    // --- LISTENERS ---
+
+    // 1. Capa Principal
+    iconeInput.addEventListener('change', function(event) {
+        updateIconePreview(event.target.files[0]);
+    });
+
+    // 2. Galeria (Acúmulo de arquivos)
+    galeriaInput.addEventListener('change', function(event) {
+        // Converte a nova seleção para um Array e adiciona ao array global
+        const newFiles = Array.from(event.target.files);
+        galleryFiles = galleryFiles.concat(newFiles);
+
+        // Atualiza o FileList do input com o array acumulado
+        updateFileInput(galeriaInput, galleryFiles);
+        
+        // Atualiza o preview
+        updateGaleriaPreview();
+    });
+
+    // --- CSS EXTRA NECESSÁRIO PARA O BOTÃO DE REMOÇÃO ---
+    // Você deve adicionar este CSS para o botão de remoção funcionar visualmente.
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .remove-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            cursor: pointer;
+            color: #dc3545; /* Cor vermelha do Bootstrap */
+            background: white;
+            border-radius: 50%;
+            line-height: 0;
+            padding: 3px;
+            font-size: 1.2rem;
+            z-index: 10;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            transition: color 0.2s;
+        }
+        .remove-btn:hover {
+            color: #c82333;
+        }
+        .thumbnail-item {
+            position: relative; /* Para posicionar o remove-btn */
+        }
+    `;
+    document.head.appendChild(style);
+
+});
+</script>
+{% endblock %}
+{% endblock %}

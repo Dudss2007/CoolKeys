@@ -1,85 +1,116 @@
-{% extends 'admin_base.html' %}
+{% extends 'admin_base.html' %} 
+{% load static %}
 
-{% block titulo %}Dashboard{% endblock %}
+{% block title %}Dashboard Admin{% endblock %}
 
 {% block conteudo %}
-<div class="dashboard-content">
-    <!-- Cabeçalho -->
-    <div class="dashboard-header">
-        <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
-        <p>Visão geral do sistema</p>
-    </div>
+<div class="container-fluid py-5 px-4"> <h1 class="dashboard-title mb-5">
+        <i class="fas fa-tachometer-alt me-3"></i> Dashboard Administrativo
+    </h1>
 
-    <!-- Cards de Estatísticas -->
-    <div class="row stats-cards">
-        <div class="col-md-3 col-sm-6">
-            <div class="stat-card bg-primary">
-                <div class="stat-icon">
-                    <i class="fas fa-box"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>150</h3>
-                    <p>Produtos</p>
-                </div>
+    <div class="row g-4 mb-5">
+        
+<div class="col-md-4">
+    <div class="stat-card stat-card-jogos"> 
+        <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-gamepad fa-3x text-ciano-icon me-3"></i>
+            <div>
+                <p class="stat-label mb-1">Total de Jogos</p>
+                <h2 class="stat-value mb-0">{{ total_jogos }}</h2>
             </div>
         </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="stat-card bg-success">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>1,234</h3>
-                    <p>Usuários</p>
-                </div>
-            </div>
+        
+        <h6 class="text-white-50 mt-3 mb-2">Editar:</h6>
+        
+        {# CONTÊINER PARA SCROLL HORIZONTAL (SEM BOTÃO VER TODOS) #}
+        <div class="horizontal-scroll-container">
+            
+            {% for jogo in jogos %}
+                <a href="{% url 'editar_jogo' jogo.id %}" class="game-card-link">
+                    <div class="game-card-custom">
+                    {# ÍCONE CORRIGIDO: Adicionado .url para garantir o caminho correto da imagem #}
+                    <img src="{{ jogo.icone.url }}" alt="{{ jogo.nome }}" class="game-icon-block"> 
+                    {# NOME #}
+                    <span class="game-name-block">{{ jogo.nome|truncatechars:15 }}</span>
+                    <span class="game-name-block">#{{ jogo.id }}</span>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="text-muted small">Nenhum jogo encontrado.</p>
+            {% endfor %}
+            
         </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="stat-card bg-warning">
-                <div class="stat-icon">
-                    <i class="fas fa-shopping-cart"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>89</h3>
-                    <p>Pedidos</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-sm-6">
-            <div class="stat-card bg-info">
-                <div class="stat-icon">
-                    <i class="fas fa-dollar-sign"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>R$ 12.580</h3>
-                    <p>Faturamento</p>
-                </div>
-            </div>
-        </div>
+        {# FIM DO BLOCO SCROLL #}
     </div>
+</div>
 
-    <!-- Mensagem de Boas-vindas -->
-    <div class="welcome-card">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title"><i class="fas fa-info-circle"></i> Bem-vindo ao Painel Administrativo</h5>
-                <p class="card-text">
-                    Gerencie seus produtos, usuários, pedidos e configurações de forma centralizada.
-                    Use o menu lateral para navegar entre as seções do sistema.
-                </p>
-                <div class="alert alert-light mt-3">
-                    <small><i class="fas fa-lightbulb"></i> Dica: Você pode visualizar relatórios detalhados na seção "Relatórios".</small>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-shopping-bag fa-3x text-success-neon-icon"></i>
+                    <div>
+                        <p class="stat-label mb-1">Vendas Fechadas</p>
+                        <h2 class="stat-value mb-0">{{ total_compras }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-users fa-3x text-destaque-icon"></i>
+                    <div>
+                        <p class="stat-label mb-1">Total de Usuários</p>
+                        <h2 class="stat-value mb-0">{{ total_users }}</h2> 
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="admin-footer">
-        <p class="mb-0">
-            <i class="fas fa-shield-alt"></i> © 2024 CoolKeys Admin Dashboard - Área Restrita
-        </p>
-        <small class="text-muted">Último acesso: Hoje às {{ "now"|date:"H:i" }}</small>
-    </footer>
+    <h2 class="text-white">Gerenciamento Rápido</h2>
+    <div class="row g-4 mb-5">
+        
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'criar_jogo' %}" class="tool-card tool-card-create-game text-decoration-none">
+                <i class="fas fa-plus-circle fa-2x mb-3"></i>
+                <p class="mb-0">1. Criar Novo Jogo</p>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'gerenciar_categorias' %}" class="tool-card tool-card-category text-decoration-none">
+                <i class="fas fa-tags fa-2x mb-3"></i>
+                <p class="mb-0">2. Categorias</p>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <a href="{% url 'gerenciar_usuarios' %}" class="tool-card tool-card-users text-decoration-none">
+                <i class="fas fa-user-circle fa-2x mb-3"></i>
+                <p class="mb-0">3. Ver Usuários</p>
+            </a>
+        </div>
+    </div>
+    
+    <h2 class="text-white">Últimas 5 Compras</h2>
+    <div class="card p-4 recent-sales-card shadow">
+        {% if compras_recentes %}
+            <ul class="list-group list-group-flush">
+                {% for compra in compras_recentes %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-white-50"><i class="far fa-calendar-alt me-2"></i>{{ compra.data_compra|date:"d/m/Y H:i" }}</span>
+                        <span class="text-white fw-bold"><i class="far fa-user me-2"></i>{{ compra.usuario.username }}</span>
+                        <span class="price-new-neon">R$ {{ compra.valor_total|floatformat:2 }}</span>
+                        <span class="badge px-3 py-2 bg-{% if compra.status == 'finalizada' %}success-neon-bg{% else %}warning{% endif %}">{{ compra.status|upper }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-center text-muted py-4">Nenhuma compra finalizada recentemente.</p>
+        {% endif %}
+    </div>
+
 </div>
 {% endblock %}

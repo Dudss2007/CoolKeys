@@ -20,7 +20,7 @@ class Categoria(models.Model):
 # Jogos:
 class Jogo(models.Model):
     nome = models.CharField(max_length=200) 
-    preco = models.DecimalField(max_digits=8, decimal_places=2)
+    preco = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(0)])
     descricao = models.TextField()
     banner = models.BooleanField(default=False) # Se o jogo é um jogo que aparece no banner
     pre_lancamento = models.BooleanField(default=False) # Apenas 1 jogo pode ser marcado, classe para fazer destaque de 1 jogo
