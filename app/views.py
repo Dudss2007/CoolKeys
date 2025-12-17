@@ -231,7 +231,7 @@ def jogo_detalhe_view(request, id):
     
     # 1. Obter os IDs de todas as categorias do jogo atual
     # Se o jogo não tiver categorias, este QuerySet estará vazio.
-    categorias_do_jogo = jogo.categoria.all()
+    categorias_do_jogo = jogo.categoria.all().first()
     
     # 2. Filtrar JOGOS RELACIONADOS
     # Usa 'categoria__in' para encontrar outros jogos que pertençam a QUALQUER UMA 
