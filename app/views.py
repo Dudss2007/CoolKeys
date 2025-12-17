@@ -5,6 +5,16 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.models import Group # <-- Importação para cadastro usuario do grupo Cliente
+from django.db.models import Q
+from django.http import JsonResponse
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import *  # 1. Importar
+from django.contrib.auth.forms import UserCreationForm #formulário de criação de usuário
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.contrib.auth.models import Group # <-- Importação para cadastro usuario do grupo Cliente
 
 def home_view(request):
     # 1. Jogos do Banner Principal (Carrossel do topo)
@@ -282,3 +292,61 @@ def dashboard_admin_view(request):
     
     return render(request, 'admin/dashboard.html', context)
 
+def pagina_faq(request):
+    # Não precisa de lógica, apenas renderiza o template
+    return render(request, 'faq.html') 
+    # (Ajuste 'seu_app' para o nome do seu aplicativo)
+def autocomplete_search_view(request):
+    if 'term' in request.GET:
+        term = request.GET.get('term')
+        
+        # Filtra jogos
+        jogos = Jogo.objects.filter(
+            nome__icontains=term, 
+            deletado=False
+        )[:10]
+
+        results = []
+        for jogo in jogos:
+            # CORREÇÃO: Adicionando 'icon_url' ao JSON
+            icon_url = jogo.icone.url if jogo.icone else '' # Garantir que o ícone exista
+            
+            results.append({
+                'label': jogo.nome,
+                'value': jogo.nome,
+                'id': jogo.id,
+                'icon_url': icon_url 
+            })
+        
+        return JsonResponse(results, safe=False)
+    
+    return JsonResponse([], safe=False)
+
+# 2. VIEW PARA EXIBIR A PÁGINA DE RESULTADOS (Se o usuário apertar Enter)
+def resultado_pesquisa_view(request):
+    query = request.GET.get('q') # Pega o que está no input com name="q"
+    
+    jogos = Jogo.objects.none() # Começa com resultados vazios
+    
+    if query:
+        # Busca por nome ou descrição
+        jogos = Jogo.objects.filter(
+            Q(nome__icontains=query) | Q(descricao__icontains=query),
+            deletado=False
+        ).distinct()
+
+    # Adicionando contexto essencial para o base.html (navbar e carrinho)
+    
+    # IMPORTANTE: Você precisa garantir que a função get_total_carrinho exista e esteja importada/definida.
+        
+    categorias = Categoria.objects.all()
+
+    context = {
+        'query': query,
+        'jogos': jogos,
+    }
+    return render(request, 'resultado_pesquisa.html',)
+def suporte_view(request):
+    # Adicione o contexto necessário para o base.html (categorias e carrinho)
+
+    return render(request, 'suporte.html',)

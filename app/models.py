@@ -50,7 +50,7 @@ class Jogo(models.Model):
         null=True, 
         blank=True,
     )
-    STATUS_CHOICES = [
+    STATUS_CHOICES = [ # Por enquanto desativado
         # Adicione as plataformas
         ('pc', 'PC'),
     ]

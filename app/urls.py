@@ -16,4 +16,8 @@ urlpatterns = [
     path('cadastro/', views.cadastro_view, name='cadastro'),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('faq/', views.pagina_faq, name='faq'),
+    path('resultado_pesquisa/', views.resultado_pesquisa_view, name='resultado_pesquisa'),
+    path('autocomplete/', views.autocomplete_search_view, name='autocomplete_search'),
+    path('suporte/', views.suporte_view, name='suporte'),
 ]

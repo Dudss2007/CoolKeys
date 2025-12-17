@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Suporte e Contato{% endblock %}
+
+{% block conteudo %}
+<div class="suporte-page-container">
+    <div class="container py-5">
+        
+        <h1 class="text-center mb-5 suporte-titulo">
+            Precisa de Ajuda? <span class="text-info">Fale Conosco</span>
+        </h1>
+
+        <div class="row">
+            
+            <div class="col-lg-5 mb-4 d-flex flex-column"> 
+                
+                <div class="info-card flex-grow-1 mb-4">
+                    <h4 class="card-title"><i class="fas fa-question-circle mr-2"></i> Perguntas Frequentes</h4>
+                    <p class="text-muted">A resposta para a sua dúvida pode estar aqui. Sugerimos verificar antes de enviar a solicitação.</p>
+                    <a href="{% url 'faq' %}" class="btn btn-block btn-info btn-custom-action mt-auto">
+                        <i class="fas fa-search"></i> Ver FAQ
+                    </a>
+                </div>
+                
+                <div class="info-card">
+                    <h4 class="card-title"><i class="fas fa-envelope mr-2"></i> Contato Direto</h4>
+                    <p>Se preferir, envie um e-mail para a nossa equipe.</p>
+                    <ul class="list-unstyled contact-list">
+                        <li><strong>E-mail:</strong> <a href="mailto:suporte@coolkeys.com">Dudss2007@gmail.com</a></li>
+                        <li><strong>Telefone:</strong> +55 21 98750-5187</li>
+                        <li><strong>Horário:</strong> Seg-Sex, 12h às 22h (BRT)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="form-card h-100"> <h4 class="card-title"><i class="fas fa-headset mr-2"></i> Enviar Mensagem</h4>
+                    <p class="text-muted">Descreva sua dúvida ou problema detalhadamente. Não se esqueça de incluir seu ID de pedido, se aplicável.</p>
+                    
+                    <form method="post" action="#">
+                        {% csrf_token %}
+                        
+                        <div class="form-group input-custom-group">
+                            <label for="nome">Seu Nome</label>
+                            <input type="text" class="form-control" id="nome" name="nome" required>
+                        </div>
+                        
+                        <div class="form-group input-custom-group">
+                            <label for="email">Seu E-mail</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group input-custom-group">
+                            <label for="assunto">Assunto</label>
+                            <input type="text" class="form-control" id="assunto" name="assunto" required>
+                        </div>
+                        
+                        <div class="form-group input-custom-group">
+                            <label for="mensagem">Mensagem</label>
+                            <textarea class="form-control" id="mensagem" name="mensagem" rows="5" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-info btn-block btn-custom-submit mt-4">
+                            Enviar Solicitação
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

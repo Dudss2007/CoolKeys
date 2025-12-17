@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Carrinho - CoolKeys{% endblock %}
+
+{% block conteudo %}
+<div class="container py-5">
+    <div class="faq-section">
+        <h1 class="faq-title">Perguntas Frequentes (FAQ)</h1>
+
+        <div id="faqAccordion">
+
+            <div class="card card-header-custom">
+                <div class="card-header" id="headingOne">
+                    <button class="btn faq-question-btn collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        <span>Onde encontro o jogo que comprei?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#faqAccordion">
+                    <div class="card-body card-body-custom">
+                        Após a finalização da sua compra, todos os jogos adquiridos são automaticamente adicionados à sua Biblioteca (Meus Jogos). Você pode acessá-la no seu Perfil, clicando no ícone do usuário na barra de navegação.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card card-header-custom">
+                <div class="card-header" id="headingTwo">
+                    <button class="btn faq-question-btn collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        <span>Esse site funciona de verdade?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#faqAccordion">
+                    <div class="card-body card-body-custom">
+                        Esse site foi feito com o objetivo de chegar o mais perto de algo real, .....................
+                </div>
+            </div>
+        </div>
+            <div class="card card-header-custom">
+                <div class="card-header" id="headingThree">
+                    <button class="btn faq-question-btn collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <span>Como eu mudo minha foto de perfil?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#faqAccordion">
+                    <div class="card-body card-body-custom">
+                        Para trocar sua foto, vá até o Perfil. Clique no ícone da camera que aparece sobre sua foto atual. Ao selecionar uma nova imagem, o upload será feito automaticamente.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-header-custom">
+                <div class="card-header" id="headingFour">
+                    <button class="btn faq-question-btn collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                        <span>Um bug aconteceu, o que devo fazer?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#faqAccordion">
+                    <div class="card-body card-body-custom">
+                        Contatar os devs pela pagina de suporte ou pessoalmente pelas redes socais que estão no rodape da pagina.
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="text-center mt-5">
+            <p class="text-muted">Não encontrou sua resposta? Contate nosso suporte.</p>
+            <a href="{% url 'suporte' %}" class="btn btn-outline-info rounded-pill px-4 fw-bold">Fale Conosco</a>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

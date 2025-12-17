@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Resultados para "{{ query }}"{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-5">
+    
+    <h1 class="text-white mb-4">
+        {% if jogos %}
+            Resultados para: <span class="text-info">"{{ query }}"</span>
+        {% else %}
+            Nenhum resultado encontrado para: <span class="text-info">"{{ query }}"</span>
+        {% endif %}
+    </h1>
+
+    <div class="row">
+        {% for jogo in jogos %}
+            <div class="col-md-3 mb-4">
+                <div class="card text-white bg-dark">
+                    <img src="{{ jogo.icone.url }}" class="card-img-top" alt="{{ jogo.nome }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ jogo.nome }}</h5>
+                        <p class="card-text">R$ {{ jogo.preco_com_desconto|floatformat:2 }}</p>
+                        <a href="jogo/detalhe/{{ jogo.id }}/" class="btn btn-info btn-block">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if not jogos %}
+        <div class="alert alert-secondary text-center">
+            Tente buscar por outro termo ou explore as nossas categorias.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

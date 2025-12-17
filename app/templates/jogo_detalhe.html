@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Detalhes do Jogo - {{ jogo.nome }}{% endblock %}
 
@@ -8,16 +9,15 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb" style="background: transparent; padding-left: 0;">
             <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-muted">Home</a></li>
-            {% with primeira_categoria=jogo.categoria.first %}
-            {% if primeira_categoria %}
-                <li class="breadcrumb-item">
-                    {# NOTE: Substituí a URL estática por uma URL nomeada, assumindo que você criou 'detalhe_categoria' #}
-                    <a href="{% url 'detalhe_categoria' primeira_categoria.id %}" class="text-decoration-none text-muted">
-                        {{ primeira_categoria.nome }}
-                    </a>
-                </li>
-            {% endif %}
-            {% endwith %}
+            
+            {% for categoria in categorias_atuais|slice:":1" %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'detalhe_categoria' categoria.id %}" class="text-decoration-none text-muted">
+                    {{ categoria.nome }}
+                </a>
+            </li>
+            {% endfor %}
+            
             <li class="breadcrumb-item active text-light" aria-current="page">{{ jogo.nome }}</li>
         </ol>
     </nav>
@@ -27,11 +27,30 @@
             
             <div class="col-lg-7 d-flex flex-column border-end border-secondary" style="border-right-color: rgba(255,255,255,0.1) !important;">
                 
-                {% if jogo.icone %}
-                    <img src="{{ jogo.icone.url }}" alt="{{ jogo.nome }}" class="main-game-image">
-                {% else %}
-                    <img src="https://via.placeholder.com/800x600?text=Sem+Imagem" alt="{{ jogo.nome }}" class="main-game-image">
-                {% endif %}
+                <div class="mb-3 position-relative">
+                    {% if jogo.icone %}
+                        <img id="main-image" src="{{ jogo.icone.url }}" alt="{{ jogo.nome }}" class="main-game-image" style="cursor: zoom-in;">
+                    {% else %}
+                        <img id="main-image" src="https://via.placeholder.com/800x600?text=Sem+Imagem" alt="{{ jogo.nome }}" class="main-game-image" style="cursor: zoom-in;">
+                    {% endif %}
+                </div>
+
+                <div class="gallery-thumbnails mb-4 px-4 px-md-5">
+                    
+                    <div id="thumb-carousel-track" class="d-flex flex-row overflow-auto pb-2 justify-content-start thumbnail-track">
+                        
+                        <div class="thumb-item active" data-src="{{ jogo.icone.url }}">
+                            <img src="{{ jogo.icone.url }}" alt="Capa" class="thumb-img">
+                        </div>
+                        
+                        {% for imagem_extra in jogo.imagens_extras.all %}
+                            <div class="thumb-item" data-src="{{ imagem_extra.imagem.url }}">
+                                <img src="{{ imagem_extra.imagem.url }}" alt="Screenshot {{ forloop.counter }}" class="thumb-img">
+                            </div>
+                        {% endfor %}
+                        
+                    </div>
+                </div>
 
                 <div class="px-4 px-md-5 pb-4 pb-md-5 pt-3 bg-opacity-10" style="background: rgba(0,0,0,0.2); flex-grow: 1;">
                     <h3 class="text-white mb-3" style="font-size: 1.5rem; font-weight: 700; border-bottom: 2px solid #048ABF; display: inline-block; padding-bottom: 5px;">
@@ -47,34 +66,35 @@
                 
                 <h1 class="game-title text-white fw-bold display-5 mb-2">{{ jogo.nome }}</h1>
                 
-            <div class="mb-4">
-                    {% for cat in categorias_atuais %}
-                        <span class="badge bg-primary">{{ cat.nome }}</span>
+                <div class="mb-4 d-flex flex-wrap gap-2">
+                    {% for categoria in categorias_atuais %}
+                    <a href="{% url 'detalhe_categoria' categoria.id %}" class="badge bg-primary category-badge-fix text-decoration-none me-2">
+                        {{ categoria.nome }}
+                    </a>
                     {% endfor %}
-            </div>
+                </div>
                 
-                <div class="p-4 rounded mb-auto" style="background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);">
+                <div class="p-4 rounded mb-4" style="background-color: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);">
                     
                     <div class="mb-4">
                         {% if jogo.desconto and jogo.desconto > 0 %}
-                            <small class="text-white-50 d-block text-uppercase fw-bold mb-1">Oferta Especial</small>
-                            
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="price-old-strikethrough">
-                                    R$ {{ jogo.preco|floatformat:2 }}
-                                </span>
-                                <span class="discount-tag-red">
-                                    -{{ jogo.desconto }}%
-                                </span>
-                            </div>
-                            <div class="price-new-neon h1 mb-0">
-                                R$ {{ jogo.preco_com_desconto|floatformat:2 }}
-                            </div>
+                        <small class="text-white-50 d-block text-uppercase fw-bold mb-1">Oferta Especial</small>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="price-old-strikethrough">
+                                R$ {{ jogo.preco|floatformat:2 }}
+                            </span>
+                            <span class="discount-tag-red">
+                                -{{ jogo.desconto }}%
+                            </span>
+                        </div>
+                        <div class="price-new-neon h1 mb-0">
+                            R$ {{ jogo.preco_com_desconto|floatformat:2 }}
+                        </div>
 
                         {% else %}
-                            <div class="d-flex flex-column">
-                                <div class="h1 text-white font-weight-bold mb-0">R$ {{ jogo.preco|floatformat:2 }}</div>
-                            </div>
+                        <div class="d-flex flex-column">
+                            <div class="h1 text-white font-weight-bold mb-0">R$ {{ jogo.preco|floatformat:2 }}</div>
+                        </div>
                         {% endif %}
                     </div>
                     
@@ -97,22 +117,16 @@
                         </div>
                     {% endif %}
                 </div>
-
-                <div class="game-info-box mt-4">
-                    <div class="row text-center">
-                        <div class="col-4 border-end border-secondary">
-                            <div class="info-label">Categoria</div>
-                            <div class="info-value cyan">
-                                {% if jogo.categoria %}{{ jogo.categoria.nome }}{% else %}Geral{% endif %}
-                            </div>
-                        </div>
-                        <div class="col-4 border-end border-secondary">
+                
+                <div class="game-simple-info mt-auto pt-3 border-top border-secondary text-center">
+                    <div class="row">
+                        <div class="col-6">
                             <div class="info-label">Editora</div>
-                            <div class="info-value">CoolKeys</div>
+                            <div class="info-value">{{ jogo.autoria }}</div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-6">
                             <div class="info-label">Lançamento</div>
-                            <div class="info-value">2025</div>
+                            <div class="info-value">{{ jogo.lancamento|date:"d/m/Y" }}</div>
                         </div>
                     </div>
                 </div>
@@ -161,7 +175,7 @@
                                 </div>
                                 <span class="btn btn-sm btn-neon-animate mb-1">Ver</span>
                             </div>
-                            </div>
+                        </div>
                     </a>
                 </div>
             </div>
@@ -171,4 +185,34 @@
     {% endif %}
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Garante que o jQuery está carregado
+    if (typeof jQuery === 'undefined') return;
+    
+    const mainImage = document.getElementById('main-image');
+    const thumbnails = document.querySelectorAll('.thumb-item');
+
+    // 1. Lógica para trocar a imagem principal ao clicar em um slide
+    thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            const newSrc = this.getAttribute('data-src');
+            
+            // Troca a imagem principal
+            mainImage.src = newSrc;
+
+            // 2. Atualiza a classe 'active' para destacar a miniatura selecionada
+            thumbnails.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // 3. Garante que a primeira miniatura esteja ativa no carregamento (necessário para o CSS de destaque)
+    const firstThumb = document.querySelector('.thumb-item[data-src]');
+    if (firstThumb) {
+        firstThumb.classList.add('active');
+    }
+});
+</script>
 {% endblock %}

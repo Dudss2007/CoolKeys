@@ -9,15 +9,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 
 <body class="d-flex flex-column min-vh-100">
 
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #011526;"> <a class="navbar-brand" href="{% url 'home' %}">
-               <img class="pl-2" src="{% static 'img/image11.png' %}" alt="Logo" style="height: 40px; width: auto;">
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #011526;"> 
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img class="pl-2" src="{% static 'img/image11.png' %}" alt="Logo" style="height: 40px; width: auto;">
             </a>
 
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain">
@@ -33,17 +34,19 @@
                         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Categorias</a>
                         <div class="dropdown-menu">
                             {% for categoria in categorias %}
-                                <a href="/categoria/{{ categoria.id }}" class="dropdown-item">{{ categoria.nome }}</a>
+                                <a href="{% url 'detalhe_categoria' categoria.id %}" class="dropdown-item">{{ categoria.nome }}</a>
                             {% endfor %}
                         </div>
                     </li>
                 </ul>
                 
-                <form class="form-inline mx-auto my-2 my-lg-0"> 
-                    <input class="form-control" type="search" placeholder="Buscar jogo..." style="width: 400px; border-radius: 50px;">
+              <form action="{% url 'resultado_pesquisa' %}" method="get" class="form-inline mx-auto my-2 my-lg-0"> 
+                    <input id="search-input" name="q" class="form-control" type="search" placeholder="Buscar jogo..." style="width: 400px; border-radius: 50px;">
+                    <button type="submit" style="display: none;">Buscar</button>
                 </form>
 
-                <ul class="navbar-nav align-items-center"> <li class="nav-item mr-3">
+                <ul class="navbar-nav align-items-center"> 
+                    <li class="nav-item mr-3">
                         <a class="nav-link cart-link-container" href="{% url 'carrinho' %}">
                             <i class="fas fa-shopping-cart fa-lg"></i>
                             
@@ -55,17 +58,47 @@
                         </a>
                     </li>
 
+               
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
                             <i class="fas fa-user fa-lg"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <h6 class="dropdown-header">Minha Conta</h6>
-                            <a class="dropdown-item" href="{% url 'perfil' %}">Perfil</a>
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button  type="submit" class="dropdown-item">Sair</button >
-                            </form>
+                            
+                            {% if user.is_authenticated %}
+
+                                <h6 class="dropdown-header">Olá, {{ user.username }}</h6>
+                                <a class="dropdown-item" href="{% url 'perfil' %}">
+                                    <i class="fas fa-id-card fa-fw mr-2"></i> Perfil
+                                </a>
+                                
+                                {% if user.is_superuser or user.groups.all.0.name == 'adm' %}
+                                <a class="dropdown-item" href="{% url 'dashboard' %}">
+                                    <i class="fas fa-tachometer-alt fa-fw mr-2"></i> Dashboard Admin
+                                </a>
+                                {% endif %}
+                                
+                                <div class="dropdown-divider"></div>
+                                
+
+                                <form method="post" action="{% url 'logout' %}" style="margin-bottom: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt fa-fw mr-2"></i> Sair
+                                    </button>
+                                </form>
+                                
+                            {% else %}
+                                <h6 class="dropdown-header">Bem-vindo(a)!</h6>
+                                
+                                <a class="dropdown-item" href="{% url 'login' %}">
+                                    <i class="fas fa-sign-in-alt fa-fw mr-2"></i> Entrar
+                                </a>
+                                <a class="dropdown-item" href="{% url 'cadastro' %}">
+                                    <i class="fas fa-user-plus fa-fw mr-2"></i> Cadastrar
+                                </a>
+                            {% endif %}
+                            
                         </div>
                     </li>
                 </ul>
@@ -74,7 +107,7 @@
     </header>
     
     <div class="container-fluid flex-grow-1 p-0">
-        {% block conteudo %}    
+        {% block conteudo %}     
         {% endblock %}
     </div> 
 
@@ -88,13 +121,60 @@
             </div>
 
             <ul class="nav col-md-4 justify-content-end">
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Suporte</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQ</a></li>
+                <li class="nav-item"><a href="{% url 'suporte' %}" class="nav-link px-2 text-muted">Suporte</a></li>
+                <li class="nav-item"><a href="{% url 'faq' %}" class="nav-link px-2 text-muted">FAQ</a></li>
             </ul>
         </div>
     </footer>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> 
+    
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        $(function() {
+            var searchInput = $("#search-input");
+            var searchForm = searchInput.closest('form'); 
+            
+            searchInput.autocomplete({
+                source: "{% url 'autocomplete_search' %}",
+                minLength: 2,
+                select: function(event, ui) {
+                    window.location.href = '/jogo_detalhe/' + ui.item.id; 
+                    return false;
+                }
+            })
+            
+            .autocomplete("instance")._renderItem = function(ul, item) {
+                
+                var listItem = $("<li>")
+                    .appendTo(ul);
+                    
+                var content = $("<div>")
+                    .addClass("search-autocomplete-item")
+                    .append(
+                        $("<img>")
+                            .attr("src", item.icon_url)
+                            .attr("alt", item.label)
+                            .addClass("game-icon"),
+                        $("<span>")
+                            .text(item.label)
+                            .addClass("game-title")
+                    )
+                    .appendTo(listItem);
+                    
+                return listItem;
+            };
+
+            searchInput.on('keydown', function(event) {
+                if (event.keyCode === 13) {
+                    event.preventDefault(); 
+                    searchForm.submit();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
